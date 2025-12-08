@@ -133,4 +133,4 @@ docker-compose logs -f frontend
 
 ## License
 
-This project is open source and available under the MIT License.
+This project is released under the **Light House Source-Available License v1.0** (see `LICENSE`). You’re welcome to view, fork, modify, and contribute. Commercial redistribution, rebranding, or offering it as a hosted service without permission is not allowed.
