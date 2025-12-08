@@ -127,22 +127,6 @@ docker-compose build
 docker-compose logs -f backend
 docker-compose logs -f frontend
 ```
-
-## License
-
-This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License** (CC BY-NC 4.0).
-
-You are free to:
-- ✅ Share, copy, and redistribute the material
-- ✅ Adapt, remix, transform, and build upon the material
-- ✅ Use for personal, educational, or non-commercial purposes
-
-Restrictions:
-- ❌ Commercial use is not permitted without permission
-- ℹ️ You must give appropriate credit and indicate if changes were made
-
-See the [LICENSE](LICENSE) file for full details or visit https://creativecommons.org/licenses/by-nc/4.0/
-
 ## TODO / Ideas
 - Create login page for UI
 - ~~Support custom registry credentials~~
