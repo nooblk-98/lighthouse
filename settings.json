@@ -3,8 +3,8 @@
     "auto_update_enabled": false,
     "cleanup_enabled": false,
     "excluded_containers": [
-        "lighthouse-backend",
-        "lighthouse-frontend"
+        "lighthouse-frontend",
+        "lighthouse-backend"
     ],
     "notifications_enabled": false,
     "smtp_host": "",
@@ -13,5 +13,9 @@
     "smtp_password": "",
     "smtp_from": "",
     "smtp_to": "",
-    "smtp_use_tls": true
+    "smtp_use_tls": true,
+    "dockerhub_username": "",
+    "dockerhub_token": "",
+    "ghcr_username": "",
+    "ghcr_token": ""
 }
