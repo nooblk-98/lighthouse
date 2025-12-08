@@ -83,5 +83,6 @@ jobs:
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: ${{ env.REGISTRY_GHCR }}/${{ github.repository_owner }}/lighthouse-${{ matrix.image.name }}
-          subject-digest: sha256:${{ steps.build-and-push.outputs.digest }}
+          # Digest already includes the sha256: prefix from the build-push action output.
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
           push-to-registry: true
