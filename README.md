@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./logo.png" width="450" />
+  <img src="./images/full-logo.png" width="450" />
   
   # Lighthouse
   
