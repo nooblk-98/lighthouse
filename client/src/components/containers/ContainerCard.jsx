@@ -158,7 +158,7 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion }
           </div>
         ) : null}
 
-        <div className="mt-auto flex items-center justify-between gap-3">
+        <div className="mt-auto space-y-3">
           {isExcluded ? (
             <div className="text-xs text-gray-500">
               Updates are turned off for this container. Toggle above to include it in manual and auto updates.
@@ -168,11 +168,11 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion }
               Updates allowed for manual checks and scheduled runs.
             </div>
           )}
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end">
             <button
               onClick={handleCheck}
               disabled={checking || updating || toggling || isExcluded}
-              className="flex items-center space-x-1 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+              className="flex items-center space-x-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50 transition-colors"
             >
               <RefreshCw size={16} className={checking ? "animate-spin" : ""} />
               <span>{checking ? 'Checking...' : 'Check Status'}</span>
