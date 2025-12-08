@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { X, Save, Bell, Settings2, Mail, ShieldCheck } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { X, Save, Bell, Settings2, Mail, ShieldCheck, Download, Upload, Shield } from 'lucide-react';
 import { DEFAULT_SETTINGS } from '../constants/settings';
-import { validateRegistry } from '../api/settings';
+import { validateRegistry, validateSmtp, exportSettingsBackup, importSettingsBackup } from '../api/settings';
 
 const SectionTitle = ({ icon: Icon, title, description }) => (
   <div className="flex items-start gap-3 mb-4">
@@ -65,6 +65,12 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     ghcr: { state: 'idle', message: '' },
   });
   const [smtpStatus, setSmtpStatus] = useState({ state: 'idle', message: '' });
+  const [backupPassword, setBackupPassword] = useState('');
+  const [backupFormat, setBackupFormat] = useState('json');
+  const [backupStatus, setBackupStatus] = useState(null);
+  const [importPassword, setImportPassword] = useState('');
+  const [importStatus, setImportStatus] = useState(null);
+  const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
@@ -103,6 +109,57 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
       alert(err.message || 'Failed to save settings.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const statusClasses = (type) => {
+    if (type === 'success') return 'text-green-700 bg-green-50 border border-green-200';
+    if (type === 'error') return 'text-red-700 bg-red-50 border border-red-200';
+    return 'text-gray-700 bg-gray-50 border border-gray-200';
+  };
+
+  const handleExport = async () => {
+    if (!backupPassword) {
+      setBackupStatus({ type: 'error', message: 'Enter a password to encrypt the backup.' });
+      return;
+    }
+    setBackupStatus({ type: 'info', message: 'Preparing encrypted backup...' });
+    try {
+      const { blob, filename } = await exportSettingsBackup({ password: backupPassword, format: backupFormat });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename || `lighthouse-settings-backup.${backupFormat === 'yaml' ? 'yaml' : 'json'}`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setBackupStatus({ type: 'success', message: 'Backup downloaded.' });
+    } catch (err) {
+      setBackupStatus({ type: 'error', message: err.message || 'Failed to export settings.' });
+    }
+  };
+
+  const handleImport = async () => {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
+      setImportStatus({ type: 'error', message: 'Choose a backup file to import.' });
+      return;
+    }
+    if (!importPassword) {
+      setImportStatus({ type: 'error', message: 'Enter the password used to encrypt the backup.' });
+      return;
+    }
+    setImportStatus({ type: 'info', message: 'Importing and decrypting backup...' });
+    try {
+      const content = await file.text();
+      const response = await importSettingsBackup({ password: importPassword, content });
+      const restored = { ...DEFAULT_SETTINGS, ...(response?.settings || {}) };
+      setFormData(restored);
+      setImportStatus({ type: 'success', message: 'Settings restored. Review and save if needed.' });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (err) {
+      setImportStatus({ type: 'error', message: err.message || 'Failed to import backup.' });
     }
   };
 
@@ -460,6 +517,88 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
               </div>
             </div>
           ) : null}
+
+          <div className="mt-8 border-t pt-6 space-y-4">
+            <div className="flex items-center space-x-2 text-gray-800">
+              <Shield size={18} />
+              <h3 className="text-lg font-semibold">Backup &amp; Restore</h3>
+            </div>
+            <p className="text-sm text-gray-600">
+              Export settings (including credentials) to an encrypted JSON or YAML file, or import a previously saved backup.
+            </p>
+
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-3">
+                <label className="block text-sm font-medium text-gray-700">Encryption password</label>
+                <input
+                  type="password"
+                  value={backupPassword}
+                  onChange={(e) => {
+                    setBackupPassword(e.target.value);
+                    setImportPassword(e.target.value);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Required for export and import"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Export format</label>
+                  <select
+                    value={backupFormat}
+                    onChange={(e) => setBackupFormat(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  >
+                    <option value="json">JSON</option>
+                    <option value="yaml">YAML</option>
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={handleExport}
+                    className="inline-flex items-center justify-center px-3 py-2 w-full text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    <Download size={16} className="mr-2" />
+                    Export encrypted backup
+                  </button>
+                </div>
+              </div>
+              {backupStatus ? (
+                <div className={`text-sm rounded-md px-3 py-2 ${statusClasses(backupStatus.type)}`}>
+                  {backupStatus.message}
+                </div>
+              ) : null}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Backup file</label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json,.yaml,.yml"
+                    className="w-full text-sm text-gray-700"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={handleImport}
+                    className="inline-flex items-center justify-center px-3 py-2 w-full text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
+                  >
+                    <Upload size={16} className="mr-2" />
+                    Import backup
+                  </button>
+                </div>
+              </div>
+              {importStatus ? (
+                <div className={`text-sm rounded-md px-3 py-2 ${statusClasses(importStatus.type)}`}>
+                  {importStatus.message}
+                </div>
+              ) : null}
+            </div>
+          </div>
 
           <div className="pt-4 flex justify-end gap-3 border-t border-gray-200">
             <button
