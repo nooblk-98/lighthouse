@@ -13,18 +13,19 @@ jobs:
 
   get-release-tag:
     runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.get_tag.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v1
-      - name: "call action"
-        id: last_release
-        uses: InsonusK/get-latest-release@v1.1.0
-        with:
-          myToken: ${{ github.token }}
-          exclude_types: "release"
-          view_top: 1
-      - name: "Print result"
+      - name: Get tag name
+        id: get_tag
         run: |
-          echo "tag_name: ${{ steps.last_release.outputs.tag_name }}"
+          if [ "${{ github.event_name }}" == "release" ]; then
+            TAG_NAME="${{ github.event.release.tag_name }}"
+          else
+            TAG_NAME="latest"
+          fi
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "Tag name: $TAG_NAME"
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -52,4 +53,4 @@ jobs:
           file: ./client/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.DOCKERHUB }}/lighthouse-ui:latest,${{ env.DOCKERHUB }} /lighthouse-ui:${{ github.event.release.tag_name }}
+          tags: ${{ env.DOCKERHUB }}/lighthouse-ui:latest,${{ env.DOCKERHUB }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
