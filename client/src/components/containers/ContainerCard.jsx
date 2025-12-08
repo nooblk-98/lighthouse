@@ -10,6 +10,12 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion }
 
   const isExcluded = !!container.excluded;
   const isRunning = container.state === 'running';
+  const createdDisplay = (() => {
+    if (!container.created) return 'Unknown';
+    const parsed = new Date(container.created);
+    if (Number.isNaN(parsed.getTime())) return container.created;
+    return parsed.toLocaleString();
+  })();
 
   const handleCheck = async () => {
     if (isExcluded) return;
@@ -65,6 +71,7 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion }
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{container.name.replace('/', '')}</h3>
             <p className="text-sm text-gray-500 font-mono truncate max-w-xs" title={container.image}>{container.image}</p>
+            <p className="text-xs text-gray-500 mt-1">Created: {createdDisplay}</p>
           </div>
         </div>
         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${isRunning ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>

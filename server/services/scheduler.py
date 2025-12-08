@@ -2,6 +2,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from services.settings import SettingsManager
 from services.updater import UpdateService
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,12 +17,13 @@ class SchedulerService:
         self.cache = status_cache
         self.notifier = notifier
         self.job = None
+        self.last_check_time = None
+        self.next_check_time = None
 
     def start(self):
         self.scheduler.start()
         self.schedule_job()
         # Schedule an immediate scan so the UI has data right away
-        from datetime import datetime
         self.scheduler.add_job(self.run_scheduled_scan, 'date', run_date=datetime.now(), id="initial_scan")
         logger.info("Scheduler started.")
 
@@ -39,9 +41,11 @@ class SchedulerService:
             id="auto_scan",
             replace_existing=True
         )
+        self.next_check_time = self.job.next_run_time.isoformat() if self.job.next_run_time else None
 
     def run_scheduled_scan(self):
         logger.info("Running scheduled scan...")
+        self.last_check_time = datetime.utcnow().isoformat()
         auto_update = self.settings.get("auto_update_enabled")
         cleanup = self.settings.get("cleanup_enabled")
         
@@ -85,7 +89,17 @@ class SchedulerService:
                     
         except Exception as e:
             logger.error(f"Scan failed: {e}")
+        # Update next run time after completion
+        if self.job:
+            self.next_check_time = self.job.next_run_time.isoformat() if self.job.next_run_time else None
 
     def update_settings(self):
         """Called when settings change to reschedule job"""
         self.schedule_job()
+
+    def get_schedule_info(self):
+        return {
+            "last_check_time": self.last_check_time,
+            "next_check_time": self.next_check_time,
+            "interval_minutes": self.settings.get("check_interval_minutes"),
+        }

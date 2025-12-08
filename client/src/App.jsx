@@ -7,6 +7,7 @@ import SettingsModal from './components/SettingsModal';
 import ContainerGrid from './components/containers/ContainerGrid';
 import { useContainers } from './hooks/useContainers';
 import { useSettings } from './hooks/useSettings';
+import { useSchedule } from './hooks/useSchedule';
 
 const POLL_INTERVAL_MS = 30000;
 
@@ -29,10 +30,22 @@ function App() {
     save: saveSettings,
     version: settingsVersion,
   } = useSettings();
+  const {
+    schedule,
+    loading: scheduleLoading,
+    error: scheduleError,
+  } = useSchedule(POLL_INTERVAL_MS);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [bulkUpdating, setBulkUpdating] = useState(false);
   const [bulkResult, setBulkResult] = useState(null);
+
+  const formatDateLabel = (value) => {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString();
+  };
 
   const handleUpdateAll = async () => {
     setBulkUpdating(true);
@@ -54,6 +67,8 @@ function App() {
         onRefresh={refreshContainers}
         onOpenSettings={() => setSettingsOpen(true)}
         loading={containersLoading}
+        lastCheckLabel={scheduleError ? 'Error' : formatDateLabel(schedule.last_check_time)}
+        nextCheckLabel={scheduleError ? 'Error' : formatDateLabel(schedule.next_check_time)}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -65,6 +80,7 @@ function App() {
         ) : null}
 
         {settingsError ? <ErrorBanner message={settingsError} /> : null}
+        {scheduleError ? <ErrorBanner message={scheduleError} /> : null}
 
         {containersLoading && containers.length === 0 ? (
           <LoadingSpinner />

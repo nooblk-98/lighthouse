@@ -76,7 +76,7 @@ def list_containers():
                 image=str(c.image.tags[0]) if c.image.tags else c.image.id,
                 status=c.status,
                 state=c.attrs['State']['Status'],
-                created=c.image.attrs.get('Created'),  # Use Image created date
+                created=c.attrs.get('Created') or c.image.attrs.get('Created'),
                 excluded=settings_manager.is_excluded(c.name),
                 update_status=status_cache.get(c.id)
             ))
@@ -127,6 +127,11 @@ def start_scheduler():
 @app.get("/api/settings")
 def get_settings():
     return settings_manager.get_all()
+
+
+@app.get("/api/schedule")
+def get_schedule():
+    return scheduler.get_schedule_info()
 
 
 @app.post("/api/settings")
