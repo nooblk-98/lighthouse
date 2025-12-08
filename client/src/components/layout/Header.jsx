@@ -1,11 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, RefreshCcw, Settings, Clock3 } from 'lucide-react';
+import { RefreshCcw, Settings, Clock3 } from 'lucide-react';
 
 const Header = ({ onRefresh, onOpenSettings, loading, lastCheckLabel, nextCheckLabel }) => (
   <header className="bg-white shadow-sm sticky top-0 z-10">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div className="flex items-center space-x-3">
-        <LayoutDashboard className="text-indigo-600" size={28} />
+        <img src="/logo.svg" alt="Light House logo" className="h-8 w-auto" />
         <div className="flex flex-col leading-tight">
           <h1 className="text-2xl font-bold text-gray-900">Light House</h1>
           <div className="flex items-center space-x-3 text-xs text-gray-500">
