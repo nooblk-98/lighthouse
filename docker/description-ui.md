@@ -3,8 +3,36 @@
 Modern web interface for managing and monitoring Docker containers.
 
 ## Quick start
-- Pull: `docker pull lahiru98s/lighthouse-ui:latest`
-- Run (with backend reachable as `backend:8000`): `docker run --name lighthouse-frontend -p 8066:80 --network lighthouse-net lahiru98s/lighthouse-ui:latest`
+Use `docker-compose.live.yml` to run the published images without building:
+
+```yaml
+version: '3.8'
+
+services:
+	backend:
+		image: lahiru98s/lighthouse-sv:latest
+		container_name: lighthouse-backend
+		volumes:
+			- /var/run/docker.sock:/var/run/docker.sock
+			- ./settings.json:/app/settings.json
+		restart: always
+		networks:
+			- lighthouse-net
+
+	frontend:
+		image: lahiru98s/lighthouse-ui:latest
+		container_name: lighthouse-frontend
+		ports:
+			- "8066:80"
+		depends_on:
+			- backend
+		restart: always
+		networks:
+			- lighthouse-net
+
+networks:
+	lighthouse-net:
+```
 
 ## Features
 - Container dashboard and controls

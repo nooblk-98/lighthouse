@@ -3,8 +3,36 @@
 Backend API for container management and monitoring.
 
 ## Quick start
-- Pull: `docker pull lahiru98s/lighthouse-sv:latest`
-- Run (with Docker socket mount): `docker run --name lighthouse-backend -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock lahiru98s/lighthouse-sv:latest`
+Use `docker-compose.live.yml` to run the published images without building:
+
+```yaml
+version: '3.8'
+
+services:
+	backend:
+		image: lahiru98s/lighthouse-sv:latest
+		container_name: lighthouse-backend
+		volumes:
+			- /var/run/docker.sock:/var/run/docker.sock
+			- ./settings.json:/app/settings.json
+		restart: always
+		networks:
+			- lighthouse-net
+
+	frontend:
+		image: lahiru98s/lighthouse-ui:latest
+		container_name: lighthouse-frontend
+		ports:
+			- "8066:80"
+		depends_on:
+			- backend
+		restart: always
+		networks:
+			- lighthouse-net
+
+networks:
+	lighthouse-net:
+```
 
 ## Features
 - Container lifecycle operations
