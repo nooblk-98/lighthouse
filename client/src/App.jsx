@@ -8,6 +8,7 @@ import ContainerGrid from './components/containers/ContainerGrid';
 import { useContainers } from './hooks/useContainers';
 import { useSettings } from './hooks/useSettings';
 import { useSchedule } from './hooks/useSchedule';
+import ScheduleSummary from './components/layout/ScheduleSummary';
 
 const POLL_INTERVAL_MS = 30000;
 
@@ -74,6 +75,12 @@ function App() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ScheduleSummary
+          scheduleEnabled={!!settings?.auto_update_enabled}
+          lastCheckLabel={scheduleError ? 'Error' : formatDateLabel(schedule.last_check_time)}
+          nextCheckLabel={scheduleError ? 'Error' : formatDateLabel(schedule.next_check_time)}
+        />
+
         {containersError ? (
           <ErrorBanner
             message={containersError}

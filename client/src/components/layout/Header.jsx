@@ -44,26 +44,6 @@ const Header = ({
                 />
               </div>
             </div>
-
-            {scheduleEnabled ? (
-              <div className="flex flex-wrap items-center gap-5 text-sm text-gray-700">
-                <div className="inline-flex items-center gap-1.5">
-                  <Clock3 size={16} className="text-gray-500" />
-                  <span className="font-medium">Last check:</span>
-                  <span>{lastCheckLabel || '--'}</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5">
-                  <Clock3 size={16} className="text-gray-500" />
-                  <span className="font-medium">Next:</span>
-                  <span>{nextCheckLabel || '--'}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-md px-3 py-2 inline-flex items-center gap-2 shadow-xs">
-                <Clock3 size={16} className="text-gray-500" />
-                <span>Scheduling is turned off. Enable auto-update to see upcoming checks.</span>
-              </div>
-            )}
           </div>
         </div>
 
