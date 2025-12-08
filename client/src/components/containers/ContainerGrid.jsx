@@ -2,7 +2,7 @@ import React from 'react';
 import ContainerCard from './ContainerCard';
 
 const ContainerGrid = ({ containers, onCheckUpdate, onUpdate, onToggleExclusion }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
     {containers.map((container) => (
       <ContainerCard
         key={container.id}
