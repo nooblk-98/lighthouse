@@ -7,7 +7,6 @@
 
   <div>
     <a href="https://hub.docker.com/r/lahiru98s/lighthouse-ui"><img src="https://img.shields.io/docker/pulls/lahiru98s/lighthouse-ui.svg" alt="Docker UI pulls" /></a>
-    <a href="https://hub.docker.com/r/lahiru98s/lighthouse-sv"><img src="https://img.shields.io/docker/pulls/lahiru98s/lighthouse-sv.svg" alt="Docker Backend pulls" /></a>
     <a href="https://github.com/nooblk-98/lighthouse/releases"><img src="https://img.shields.io/github/v/release/nooblk-98/lighthouse?logo=github" alt="Latest release" /></a>
     <a href="https://github.com/nooblk-98/lighthouse/actions/workflows/docker-build-push.yml"><img src="https://github.com/nooblk-98/lighthouse/actions/workflows/docker-build-push.yml/badge.svg" alt="CI" /></a>
     <a href="https://github.com/nooblk-98/lighthouse/blob/main/LICENSE"><img src="https://img.shields.io/github/license/nooblk-98/lighthouse.svg" alt="License" /></a>
