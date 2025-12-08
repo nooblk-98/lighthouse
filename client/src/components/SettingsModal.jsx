@@ -64,6 +64,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     dockerhub: { state: 'idle', message: '' },
     ghcr: { state: 'idle', message: '' },
   });
+  const [smtpStatus, setSmtpStatus] = useState({ state: 'idle', message: '' });
 
   if (!isOpen) return null;
 
@@ -141,6 +142,33 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
         ...prev,
         [provider]: { state: 'error', message: err.message || 'Failed to validate credentials.' },
       }));
+    }
+  };
+
+  const handleSmtpValidate = async () => {
+    const requiredFields = ['smtp_host', 'smtp_port'];
+    const missing = requiredFields.filter((k) => !formData[k]);
+    if (missing.length) {
+      setSmtpStatus({ state: 'error', message: 'SMTP host and port are required.' });
+      return;
+    }
+
+    setActiveSection('notifications');
+    setSmtpStatus({ state: 'validating', message: 'Validating SMTP connection...' });
+    try {
+      const res = await validateSmtp({
+        host: formData.smtp_host,
+        port: Number(formData.smtp_port),
+        username: formData.smtp_username,
+        password: formData.smtp_password,
+        use_tls: !!formData.smtp_use_tls,
+      });
+      if (!res?.valid) {
+        throw new Error(res?.message || 'Validation failed');
+      }
+      setSmtpStatus({ state: 'success', message: res.message || 'SMTP validated.' });
+    } catch (err) {
+      setSmtpStatus({ state: 'error', message: err.message || 'SMTP validation failed.' });
     }
   };
 
@@ -244,6 +272,18 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 onChange={() => toggleFlag('notifications_enabled')}
                 helper="Send an email after each container update."
               />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                <StatusChip state={smtpStatus.state} message={smtpStatus.message} />
+                <button
+                  type="button"
+                  onClick={handleSmtpValidate}
+                  className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                  disabled={smtpStatus.state === 'validating' || loading}
+                >
+                  {smtpStatus.state === 'validating' ? 'Validating...' : 'Validate SMTP'}
+                </button>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

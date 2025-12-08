@@ -13,3 +13,9 @@ export const validateRegistry = ({ provider, username, token }) =>
     method: 'POST',
     body: JSON.stringify({ provider, username, token }),
   });
+
+export const validateSmtp = ({ host, port, username, password, use_tls }) =>
+  request('/notifications/validate', {
+    method: 'POST',
+    body: JSON.stringify({ host, port, username, password, use_tls }),
+  });

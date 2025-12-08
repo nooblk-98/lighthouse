@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import docker
+import smtplib
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -47,6 +48,13 @@ class RegistryCredentials(BaseModel):
     provider: str
     username: str
     token: str
+
+class SmtpCredentials(BaseModel):
+    host: str
+    port: int
+    username: Optional[str] = None
+    password: Optional[str] = None
+    use_tls: bool = True
 
 
 @app.get("/")
@@ -163,6 +171,26 @@ def validate_registry(creds: RegistryCredentials):
         raise HTTPException(status_code=400, detail=f"Registry authentication failed: {e.explanation or str(e)}")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Registry authentication failed: {str(e)}")
+
+
+@app.post("/api/notifications/validate")
+def validate_smtp(creds: SmtpCredentials):
+    if not creds.host or not creds.port:
+        raise HTTPException(status_code=400, detail="SMTP host and port are required")
+
+    try:
+        server = smtplib.SMTP(creds.host, creds.port, timeout=10)
+        server.ehlo()
+        if creds.use_tls:
+            server.starttls()
+            server.ehlo()
+        if creds.username:
+            server.login(creds.username, creds.password or "")
+        server.noop()
+        server.quit()
+        return {"valid": True, "message": "SMTP connection successful."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"SMTP validation failed: {str(e)}")
 
 
 @app.post("/api/containers/{container_id}/update")
