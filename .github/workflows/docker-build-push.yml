@@ -68,44 +68,44 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/lighthouse-ui:latest
             ghcr.io/${{ github.repository_owner }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
 
-#   build-backend:
-#     runs-on: ubuntu-latest
-#     needs: build-frontend
-#     permissions:
-#       contents: read
-#       packages: write
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v5
+  build-backend:
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
-#       - name: Login to Docker Hub
-#         uses: docker/login-action@v3
-#         with:
-#           username: ${{ secrets.DOCKERHUB_USERNAME }}
-#           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-#       - name: Login to GitHub Container Registry
-#         uses: docker/login-action@v3
-#         with:
-#           registry: ghcr.io
-#           username: ${{ github.actor }}
-#           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-#       - name: Set up QEMU
-#         uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-#       - name: Build and push
-#         uses: docker/build-push-action@v6
-#         with:
-#           context: ./client
-#           file: ./client/Dockerfile
-#           platforms: linux/amd64,linux/arm64
-#           push: true
-#           tags: |
-#             ${{ env.DOCKERHUB }}/lighthouse-ui:latest
-#             ${{ env.DOCKERHUB }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
-#             ghcr.io/${{ github.repository_owner }}/lighthouse-sv:latest
-#             ghcr.io/${{ github.repository_owner }}/lighthouse-sv:${{ needs.get-release-tag.outputs.tag_name }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB }}/lighthouse-sv:latest
+            ${{ env.DOCKERHUB }}/lighthouse-sv:${{ needs.get-release-tag.outputs.tag_name }}
+            ghcr.io/${{ github.repository_owner }}/lighthouse-sv:latest
+            ghcr.io/${{ github.repository_owner }}/lighthouse-sv:${{ needs.get-release-tag.outputs.tag_name }}
