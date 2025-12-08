@@ -14,18 +14,17 @@ jobs:
   get-release-tag:
     runs-on: ubuntu-latest
     outputs:
-      tag_name: ${{ steps.get_tag.outputs.tag_name }}
+      tag_name: ${{ steps.latest_release.outputs.release || 'latest' }}
     steps:
-      - name: Get tag name
-        id: get_tag
-        run: |
-          if [ "${{ github.event_name }}" == "release" ]; then
-            TAG_NAME="${{ github.event.release.tag_name }}"
-          else
-            TAG_NAME="latest"
-          fi
-          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "Tag name: $TAG_NAME"
+      - name: Get latest release
+        id: latest_release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Print release tag
+        run: echo "Release tag:${{ steps.latest_release.outputs.release }}"
 
   build-frontend:
     runs-on: ubuntu-latest
