@@ -1,5 +1,7 @@
+import io
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 import docker
 import smtplib
 from pydantic import BaseModel
@@ -56,6 +58,14 @@ class SmtpCredentials(BaseModel):
     password: Optional[str] = None
     use_tls: bool = True
 
+class SettingsExport(BaseModel):
+    password: str
+    format: Optional[str] = "json"
+
+class SettingsImport(BaseModel):
+    password: str
+    content: str
+
 
 @app.get("/")
 def read_root():
@@ -110,6 +120,8 @@ settings_manager = SettingsManager()
 
 notifier = NotificationService(settings_manager)
 updater = UpdateService(settings_manager)
+from services.backup import SettingsBackup
+backup_service = SettingsBackup(settings_manager)
 
 
 @app.post("/api/containers/{container_id}/check-update")
@@ -191,6 +203,29 @@ def validate_smtp(creds: SmtpCredentials):
         return {"valid": True, "message": "SMTP connection successful."}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"SMTP validation failed: {str(e)}")
+
+
+@app.post("/api/settings/export")
+def export_settings(payload: SettingsExport):
+    try:
+        content, media_type, filename = backup_service.export_encrypted(payload.password, payload.format)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    stream = io.BytesIO(content.encode("utf-8"))
+    headers = {"Content-Disposition": f'attachment; filename=\"{filename}\"'}
+    return StreamingResponse(stream, media_type=media_type, headers=headers)
+
+
+@app.post("/api/settings/import")
+def import_settings(payload: SettingsImport):
+    try:
+        restored = backup_service.import_encrypted(payload.content, payload.password)
+        scheduler.update_settings()
+        return {"restored": True, "settings": restored}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to import settings: {e}")
 
 
 @app.post("/api/containers/{container_id}/update")

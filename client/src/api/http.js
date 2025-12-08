@@ -1,6 +1,6 @@
 const API_BASE = '/api';
 
-const parseErrorMessage = async (response) => {
+export const parseErrorMessage = async (response) => {
   try {
     const data = await response.json();
     return data?.detail || data?.message || response.statusText;
@@ -25,4 +25,21 @@ export async function request(path, options = {}) {
   } catch {
     return null;
   }
+}
+
+export async function requestBlob(path, options = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  });
+
+  if (!res.ok) {
+    const message = await parseErrorMessage(res);
+    throw new Error(message);
+  }
+
+  const disposition = res.headers.get('content-disposition') || '';
+  const filename = disposition.split('filename=')[1]?.replace(/"/g, '') || null;
+  const blob = await res.blob();
+  return { blob, filename };
 }

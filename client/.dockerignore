@@ -1,4 +1,7 @@
+.git
 node_modules
 dist
-.git
+build
+.cache
 .env
+.vite
