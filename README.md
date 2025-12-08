@@ -4,17 +4,15 @@
   # Lighthouse
   
   A process for automating Docker container base image updates.
-  <br/><br/>
-  
-  [![Circle CI](https://circleci.com/gh/containrrr/watchtower.svg?style=shield)](https://circleci.com/gh/containrrr/watchtower)
-  [![codecov](https://codecov.io/gh/containrrr/watchtower/branch/main/graph/badge.svg)](https://codecov.io/gh/containrrr/watchtower)
-  [![GoDoc](https://godoc.org/github.com/containrrr/watchtower?status.svg)](https://godoc.org/github.com/containrrr/watchtower)
-  [![Go Report Card](https://goreportcard.com/badge/github.com/containrrr/watchtower)](https://goreportcard.com/report/github.com/containrrr/watchtower)
-  [![latest version](https://img.shields.io/github/tag/containrrr/watchtower.svg)](https://github.com/containrrr/watchtower/releases)
-  [![Apache-2.0 License](https://img.shields.io/github/license/containrrr/watchtower.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-  [![Codacy Badge](https://app.codacy.com/project/badge/Grade/1c48cfb7646d4009aa8c6f71287670b8)](https://www.codacy.com/gh/containrrr/watchtower/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=containrrr/watchtower&amp;utm_campaign=Badge_Grade)
-  [![All Contributors](https://img.shields.io/github/all-contributors/containrrr/watchtower)](#contributors)
-  [![Pulls from DockerHub](https://img.shields.io/docker/pulls/containrrr/watchtower.svg)](https://hub.docker.com/r/containrrr/watchtower)
+<br/><br/>
+
+[![CI](https://github.com/nooblk-98/lighthouse/actions/workflows/ci.yml/badge.svg)](https://github.com/nooblk-98/lighthouse/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/nooblk-98/lighthouse/branch/main/graph/badge.svg)](https://codecov.io/gh/nooblk-98/lighthouse)
+[![latest version](https://img.shields.io/github/v/tag/nooblk-98/lighthouse?label=release)](https://github.com/nooblk-98/lighthouse/releases)
+[![MIT License](https://img.shields.io/github/license/nooblk-98/lighthouse.svg)](https://github.com/nooblk-98/lighthouse/blob/main/LICENSE)
+[![All Contributors](https://img.shields.io/github/all-contributors/nooblk-98/lighthouse)](#contributors)
+[![Pulls from DockerHub](https://img.shields.io/docker/pulls/lahiru98s/lighthouse-ui.svg)](https://hub.docker.com/r/lahiru98s/lighthouse-ui)
+[![Pulls from DockerHub](https://img.shields.io/docker/pulls/lahiru98s/lighthouse-sv.svg)](https://hub.docker.com/r/lahiru98s/lighthouse-sv)
 
 </div>
 
