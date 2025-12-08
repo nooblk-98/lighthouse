@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { X, Save, Bell, Settings2, Mail, ShieldCheck } from 'lucide-react';
 import { DEFAULT_SETTINGS } from '../constants/settings';
 
@@ -37,6 +37,21 @@ const Toggle = ({ label, checked, onChange, helper }) => (
   </div>
 );
 
+const StatusChip = ({ state, message }) => {
+  const map = {
+    success: { text: 'Success', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    error: { text: 'Error', className: 'bg-red-50 text-red-700 border-red-200' },
+    validating: { text: 'Validating', className: 'bg-amber-50 text-amber-700 border-amber-200' },
+    idle: { text: 'Not validated', className: 'bg-gray-50 text-gray-600 border-gray-200' },
+  };
+  const cfg = map[state] || map.idle;
+  return (
+    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full border ${cfg.className}`} aria-live="polite">
+      {cfg.text}{message ? ` • ${message}` : ''}
+    </span>
+  );
+};
+
 const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, loading }) => {
   const [formData, setFormData] = useState({
     ...DEFAULT_SETTINGS,
@@ -44,8 +59,19 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
   });
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState('general');
+  const [registryStatus, setRegistryStatus] = useState({
+    dockerhub: { state: 'idle', message: '' },
+    ghcr: { state: 'idle', message: '' },
+  });
 
   if (!isOpen) return null;
+
+  useEffect(() => {
+    setFormData({
+      ...DEFAULT_SETTINGS,
+      ...settings,
+    });
+  }, [settings]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,7 +92,10 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     e.preventDefault();
     setSaving(true);
     try {
-      await onSave(formData);
+      const updated = await onSave(formData);
+      if (updated) {
+        setFormData(updated);
+      }
       onClose();
     } catch (err) {
       alert(err.message || 'Failed to save settings.');
@@ -75,9 +104,42 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     }
   };
 
+  const validateRegistryFields = (provider) => {
+    const username = formData[`${provider}_username`];
+    const token = formData[`${provider}_token`];
+    if (!username || !token) {
+      return `${provider === 'dockerhub' ? 'Docker Hub' : 'GHCR'} username and token are required.`;
+    }
+    return null;
+  };
+
+  const handleRegistrySave = async (provider) => {
+    const validationError = validateRegistryFields(provider);
+    if (validationError) {
+      setRegistryStatus((prev) => ({ ...prev, [provider]: { state: 'error', message: validationError } }));
+      return;
+    }
+
+    setActiveSection('registries');
+    setRegistryStatus((prev) => ({ ...prev, [provider]: { state: 'validating', message: 'Validating credentials...' } }));
+    try {
+      const updated = await onSave(formData);
+      if (updated) {
+        setFormData(updated);
+      }
+      setRegistryStatus((prev) => ({ ...prev, [provider]: { state: 'success', message: 'Credentials validated and saved.' } }));
+    } catch (err) {
+      setRegistryStatus((prev) => ({
+        ...prev,
+        [provider]: { state: 'error', message: err.message || 'Failed to save credentials.' },
+      }));
+    }
+  };
+
   const sections = useMemo(() => ([
     { id: 'general', label: 'General', icon: Settings2 },
     { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'registries', label: 'Registries', icon: ShieldCheck },
   ]), []);
 
   return (
@@ -253,6 +315,101 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 onChange={() => toggleFlag('smtp_use_tls')}
                 helper="Enable TLS when connecting to your SMTP server."
               />
+            </div>
+          ) : null}
+
+          {activeSection === 'registries' ? (
+            <div className="space-y-6">
+              <SectionTitle
+                icon={ShieldCheck}
+                title="Registry credentials"
+                description="Use scoped credentials when checking for updates in Docker Hub or GitHub Container Registry."
+              />
+
+              <div className="space-y-3">
+                <div className="text-xs text-gray-600">
+                  Tokens are sent only to your backend for update checks. Keep them limited to read/pull scopes.
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Docker Hub username</label>
+                    <input
+                      type="text"
+                      name="dockerhub_username"
+                      value={formData.dockerhub_username}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="dockerhub user"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Docker Hub token</label>
+                    <input
+                      type="password"
+                      name="dockerhub_token"
+                      value={formData.dockerhub_token}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="access token / PAT"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                  <StatusChip
+                    state={registryStatus.dockerhub?.state}
+                    message={registryStatus.dockerhub?.message}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRegistrySave('dockerhub')}
+                    className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    disabled={registryStatus.dockerhub?.state === 'validating' || loading}
+                  >
+                    {registryStatus.dockerhub?.state === 'validating' ? 'Validating...' : 'Validate & Save Docker Hub'}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">GHCR username</label>
+                    <input
+                      type="text"
+                      name="ghcr_username"
+                      value={formData.ghcr_username}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="github user"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">GHCR token</label>
+                    <input
+                      type="password"
+                      name="ghcr_token"
+                      value={formData.ghcr_token}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="ghcr PAT with read:packages"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                  <StatusChip
+                    state={registryStatus.ghcr?.state}
+                    message={registryStatus.ghcr?.message}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRegistrySave('ghcr')}
+                    className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    disabled={registryStatus.ghcr?.state === 'validating' || loading}
+                  >
+                    {registryStatus.ghcr?.state === 'validating' ? 'Validating...' : 'Validate & Save GHCR'}
+                  </button>
+                </div>
+              </div>
             </div>
           ) : null}
 

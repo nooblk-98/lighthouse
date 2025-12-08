@@ -167,7 +167,6 @@ function App() {
 
       {settingsOpen ? (
         <SettingsModal
-          key={settingsVersion}
           isOpen={settingsOpen}
           onClose={() => setSettingsOpen(false)}
           settings={settings}

@@ -11,4 +11,8 @@ export const DEFAULT_SETTINGS = {
   smtp_from: '',
   smtp_to: '',
   smtp_use_tls: true,
+  dockerhub_username: '',
+  dockerhub_token: '',
+  ghcr_username: '',
+  ghcr_token: '',
 };
