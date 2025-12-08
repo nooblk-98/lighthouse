@@ -12,10 +12,17 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
   if (!isOpen) return null;
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: value,
+    }));
+  };
+
+  const toggleFlag = (name) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: !prev[name],
     }));
   };
 
@@ -45,17 +52,24 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  name="auto_update_enabled"
-                  checked={formData.auto_update_enabled}
-                  onChange={handleChange}
-                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
+              <div className="flex items-center justify-between">
                 <span className="text-gray-700 font-medium">Enable Auto-Update</span>
-              </label>
-              <p className="text-sm text-gray-500 mt-1 ml-8">
+                <button
+                  type="button"
+                  onClick={() => toggleFlag('auto_update_enabled')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                    formData.auto_update_enabled ? 'bg-emerald-500' : 'bg-gray-300'
+                  }`}
+                  aria-pressed={formData.auto_update_enabled}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                      formData.auto_update_enabled ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
                 If enabled, containers will be automatically updated when a new image is found during scheduled scans.
               </p>
             </div>
@@ -75,17 +89,24 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
             </div>
 
             <div>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  name="cleanup_enabled"
-                  checked={formData.cleanup_enabled}
-                  onChange={handleChange}
-                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
+              <div className="flex items-center justify-between">
                 <span className="text-gray-700 font-medium">Cleanup Old Images</span>
-              </label>
-              <p className="text-sm text-gray-500 mt-1 ml-8">
+                <button
+                  type="button"
+                  onClick={() => toggleFlag('cleanup_enabled')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                    formData.cleanup_enabled ? 'bg-emerald-500' : 'bg-gray-300'
+                  }`}
+                  aria-pressed={formData.cleanup_enabled}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                      formData.cleanup_enabled ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
                 Automatically remove old images after a successful update to save space.
               </p>
             </div>

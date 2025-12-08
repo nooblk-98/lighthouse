@@ -3,6 +3,8 @@ import {
   getContainers,
   checkContainerUpdate,
   updateContainer,
+  updateAllContainers,
+  setContainerExclusion,
 } from '../api/containers';
 
 const DEFAULT_ERROR = 'Failed to fetch containers. Make sure the backend is running.';
@@ -33,6 +35,18 @@ export function useContainers(pollIntervalMs = 30000) {
     return result;
   }, [loadContainers]);
 
+  const updateAll = useCallback(async () => {
+    const result = await updateAllContainers();
+    await loadContainers();
+    return result;
+  }, [loadContainers]);
+
+  const setExclusion = useCallback(async (id, excluded) => {
+    const result = await setContainerExclusion(id, excluded);
+    await loadContainers();
+    return result;
+  }, [loadContainers]);
+
   useEffect(() => {
     loadContainers();
     const interval = setInterval(loadContainers, pollIntervalMs);
@@ -46,5 +60,7 @@ export function useContainers(pollIntervalMs = 30000) {
     refresh: loadContainers,
     checkUpdate,
     update,
+    updateAll,
+    setExclusion,
   };
 }

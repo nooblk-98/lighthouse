@@ -27,6 +27,7 @@ except Exception as e:
     print(f"Error connecting to Docker: {e}")
     client = None
 
+
 class ContainerInfo(BaseModel):
     id: str
     short_id: str
@@ -35,17 +36,35 @@ class ContainerInfo(BaseModel):
     status: str
     state: str
     created: str
+    excluded: bool = False
     update_status: Optional[dict] = None
+
+
+class ContainerExclusion(BaseModel):
+    excluded: bool
+
 
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "Light House Backend Running"}
 
+
+def get_container_or_404(container_id: str):
+    if not client:
+        raise HTTPException(status_code=500, detail="Docker client not connected")
+    try:
+        return client.containers.get(container_id)
+    except docker.errors.NotFound:
+        raise HTTPException(status_code=404, detail="Container not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/containers", response_model=List[ContainerInfo])
 def list_containers():
     if not client:
         raise HTTPException(status_code=500, detail="Docker client not connected")
-    
+
     containers = []
     try:
         # List all containers (running and stopped)
@@ -57,23 +76,33 @@ def list_containers():
                 image=str(c.image.tags[0]) if c.image.tags else c.image.id,
                 status=c.status,
                 state=c.attrs['State']['Status'],
-                created=c.image.attrs.get('Created'), # Use Image created date
+                created=c.image.attrs.get('Created'),  # Use Image created date
+                excluded=settings_manager.is_excluded(c.name),
                 update_status=status_cache.get(c.id)
             ))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-        
+
     return containers
+
 
 from services.updater import UpdateService
 updater = UpdateService()
 
+
 @app.post("/api/containers/{container_id}/check-update")
 def check_update(container_id: str):
+    container = get_container_or_404(container_id)
+    if settings_manager.is_excluded(container.name):
+        skipped = {"update_available": False, "skipped": True, "reason": "Container excluded from updates"}
+        status_cache.update(container_id, skipped)
+        return skipped
+
     result = updater.check_for_update(container_id)
     if "error" not in result:
         status_cache.update(container_id, result)
     return result
+
 
 from services.cache import StatusCache
 status_cache = StatusCache()
@@ -85,13 +114,16 @@ settings_manager = SettingsManager()
 # Pass updater to scheduler
 scheduler = SchedulerService(settings_manager, updater, status_cache)
 
+
 @app.on_event("startup")
 def start_scheduler():
     scheduler.start()
 
+
 @app.get("/api/settings")
 def get_settings():
     return settings_manager.get_all()
+
 
 @app.post("/api/settings")
 def update_settings(new_settings: dict):
@@ -99,12 +131,110 @@ def update_settings(new_settings: dict):
     scheduler.update_settings()
     return updated
 
+
 @app.post("/api/containers/{container_id}/update")
 def perform_update(container_id: str):
+    container = get_container_or_404(container_id)
+    if settings_manager.is_excluded(container.name):
+        raise HTTPException(status_code=400, detail="Updates are disabled for this container")
+
     result = updater.update_container(container_id)
     if not result.get("success"):
-         raise HTTPException(status_code=500, detail=result.get("error"))
+        raise HTTPException(status_code=500, detail=result.get("error"))
     return result
+
+
+@app.post("/api/containers/{container_id}/exclusion")
+def set_container_exclusion(container_id: str, payload: ContainerExclusion):
+    container = get_container_or_404(container_id)
+    settings_manager.set_excluded(container.name, payload.excluded)
+    return {
+        "id": container.id,
+        "name": container.name,
+        "excluded": settings_manager.is_excluded(container.name),
+        "excluded_containers": settings_manager.get_exclusions(),
+    }
+
+
+@app.post("/api/containers/update-all")
+def update_all_containers():
+    if not client:
+        raise HTTPException(status_code=500, detail="Docker client not connected")
+
+    results = []
+    for c in client.containers.list(all=True):
+        name = c.name
+        if settings_manager.is_excluded(name):
+            reason = "Container excluded from updates"
+            results.append({
+                "id": c.id,
+                "name": name,
+                "status": "skipped",
+                "reason": reason,
+            })
+            status_cache.update(c.id, {"update_available": False, "skipped": True, "reason": reason})
+            continue
+
+        try:
+            check_result = updater.check_for_update(c.id)
+            if check_result.get("error"):
+                results.append({
+                    "id": c.id,
+                    "name": name,
+                    "status": "error",
+                    "message": check_result.get("error"),
+                })
+                continue
+
+            status_cache.update(c.id, check_result)
+
+            if not check_result.get("update_available"):
+                results.append({
+                    "id": c.id,
+                    "name": name,
+                    "status": "up_to_date",
+                    "message": "No updates found",
+                })
+                continue
+
+            update_result = updater.update_container(c.id)
+            if update_result.get("success"):
+                results.append({
+                    "id": c.id,
+                    "name": name,
+                    "status": "updated",
+                    "message": update_result.get("message", "Updated successfully"),
+                })
+                status_cache.update(c.id, {
+                    "update_available": False,
+                    "current_id": check_result.get("latest_id"),
+                    "latest_id": check_result.get("latest_id"),
+                })
+            else:
+                results.append({
+                    "id": c.id,
+                    "name": name,
+                    "status": "error",
+                    "message": update_result.get("error", "Update failed"),
+                })
+        except Exception as e:
+            results.append({
+                "id": c.id,
+                "name": name,
+                "status": "error",
+                "message": str(e),
+            })
+
+    summary = {
+        "updated": len([r for r in results if r["status"] == "updated"]),
+        "up_to_date": len([r for r in results if r["status"] == "up_to_date"]),
+        "skipped": len([r for r in results if r["status"] == "skipped"]),
+        "errors": len([r for r in results if r["status"] == "error"]),
+        "total": len(results),
+    }
+
+    return {"results": results, "summary": summary}
+
 
 if __name__ == "__main__":
     import uvicorn

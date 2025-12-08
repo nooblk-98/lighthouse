@@ -52,6 +52,10 @@ class SchedulerService:
             containers = self.updater.client.containers.list(all=True)
             for container in containers:
                 try:
+                    if self.settings.is_excluded(container.name):
+                        self.cache.update(container.id, {"update_available": False, "skipped": True, "reason": "Container excluded from updates"})
+                        continue
+
                     # Check for update
                     result = self.updater.check_for_update(container.id)
                     # Update cache

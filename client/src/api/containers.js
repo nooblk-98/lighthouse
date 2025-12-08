@@ -7,3 +7,12 @@ export const checkContainerUpdate = (id) =>
 
 export const updateContainer = (id) =>
   request(`/containers/${id}/update`, { method: 'POST' });
+
+export const updateAllContainers = () =>
+  request('/containers/update-all', { method: 'POST' });
+
+export const setContainerExclusion = (id, excluded) =>
+  request(`/containers/${id}/exclusion`, {
+    method: 'POST',
+    body: JSON.stringify({ excluded }),
+  });
