@@ -11,8 +11,24 @@ env:
 
 jobs:
 
+  get-release-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: "call action"
+        id: last_release
+        uses: InsonusK/get-latest-release@v1.1.0
+        with:
+          myToken: ${{ github.token }}
+          exclude_types: "release"
+          view_top: 1
+      - name: "Print result"
+        run: |
+          echo "tag_name: ${{ steps.last_release.outputs.tag_name }}"
+
   build-frontend:
     runs-on: ubuntu-latest
+    needs: get-release-tag
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -36,4 +52,4 @@ jobs:
           file: ./client/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.DOCKERHUB }}/lighthouse-ui:latest,${{ env.DOCKERHUB }}/lighthouse-ui:${{ github.event.release.tag_name }}
+          tags: ${{ env.DOCKERHUB }}/lighthouse-ui:latest,${{ env.DOCKERHUB }} /lighthouse-ui:${{ github.event.release.tag_name }}
