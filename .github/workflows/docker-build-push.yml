@@ -6,6 +6,9 @@ on:
     types: [published]
   workflow_dispatch:
 
+env:
+  DOCKERHUB: lahiru98s
+
 jobs:
 
   build-frontend:
@@ -33,4 +36,4 @@ jobs:
           file: ./client/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: lighthouse-ui:latest,lighthouse-ui:${{ github.ref_name }}
+          tags: ${{ env.DOCKERHUB }}/lighthouse-ui:latest,${{ env.DOCKERHUB }}/lighthouse-ui:${{ github.ref_name }}
