@@ -7,8 +7,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
-    expose:
-      - "8000"
     networks:
       - lighthouse-net
 
@@ -16,7 +14,7 @@ services:
     build: ./client
     container_name: lighthouse-frontend
     ports:
-      - "80:80"
+      - "8066:80"
     depends_on:
       - backend
     restart: always
