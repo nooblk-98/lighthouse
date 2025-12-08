@@ -1,11 +1,63 @@
 import docker
 import logging
+from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
 class UpdateService:
-    def __init__(self):
+    def __init__(self, settings_manager):
         self.client = docker.from_env()
+        self.settings = settings_manager
+        # Remember the last successful auth attempt to avoid re-authing on every pull
+        self._auth_cache = {}
+
+    def _detect_registry(self, image_name: str) -> Tuple[Optional[str], Optional[str]]:
+        """
+        Identify which registry provider/URL to use for auth based on the image reference.
+        Returns (provider_key, registry_url) or (None, None) if not handled.
+        """
+        parts = image_name.split("/")
+        registry_hint = parts[0].lower() if parts else ""
+
+        if registry_hint in {"ghcr.io"}:
+            return "ghcr", "ghcr.io"
+
+        if registry_hint in {"docker.io", "index.docker.io"}:
+            return "dockerhub", "https://index.docker.io/v1/"
+
+        # If no registry host is present (no dot/colon), default to Docker Hub.
+        if not (registry_hint and any(ch in registry_hint for ch in [".", ":"])):  # e.g. nginx or user/image
+            return "dockerhub", "https://index.docker.io/v1/"
+
+        # Unknown/unsupported registry host (e.g. quay.io); let Docker handle it without custom auth.
+        return None, None
+
+    def _ensure_registry_auth(self, image_name: str) -> Optional[str]:
+        """
+        Log in to Docker Hub or GHCR when credentials are configured.
+        Returns an error string if auth fails, otherwise None.
+        """
+        provider, registry_url = self._detect_registry(image_name)
+        if not provider or not registry_url:
+            return None
+
+        username = self.settings.get(f"{provider}_username")
+        token = self.settings.get(f"{provider}_token")
+        if not username or not token:
+            return None
+
+        cache_key = (provider, username, token, registry_url)
+        if self._auth_cache.get(cache_key):
+            return None
+
+        try:
+            logger.info(f"Authenticating to {registry_url} for {provider} images")
+            self.client.login(username=username, password=token, registry=registry_url)
+            self._auth_cache = {cache_key: True}
+            return None
+        except Exception as e:
+            logger.error(f"Registry authentication failed for {registry_url}: {e}")
+            return f"Registry authentication failed for {registry_url}: {e}"
 
     def check_for_update(self, container_id: str) -> dict:
         """
@@ -16,18 +68,19 @@ class UpdateService:
             container = self.client.containers.get(container_id)
             image_name = container.attrs['Config']['Image']
             current_image_id = container.image.id
-            
+
+            # Ensure we are authenticated before pulling private images
+            auth_error = self._ensure_registry_auth(image_name)
+            if auth_error:
+                return {"error": auth_error, "update_available": False}
+
             # Get current image details
             created_date = container.image.attrs.get('Created')
-            
+
             # Pull the latest version of the image
             logger.info(f"Checking update for {container.name} ({image_name})...")
             try:
-                # This pulls the image. 
-                # Note: This might take time and bandwidth.
-                # In a real app, maybe only check manifest digest to save bandwidth?
-                # But Docker SDK pull uses 'latest' by default if no tag, 
-                # or uses the existing tag.
+                # This pulls the image.
                 pulled_image = self.client.images.pull(image_name)
             except Exception as e:
                 logger.error(f"Failed to pull image {image_name}: {e}")
@@ -57,7 +110,12 @@ class UpdateService:
             old_container = self.client.containers.get(container_id)
             container_name = old_container.name
             image_name = old_container.attrs['Config']['Image']
-            
+
+            # Authenticate before pulling to support private registries
+            auth_error = self._ensure_registry_auth(image_name)
+            if auth_error:
+                return {"success": False, "error": auth_error}
+
             # 1. Pull latest image
             logger.info(f"Pulling latest image for {container_name}...")
             self.client.images.pull(image_name)

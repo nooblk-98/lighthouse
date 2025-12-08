@@ -109,7 +109,7 @@ from services.settings import SettingsManager
 settings_manager = SettingsManager()
 
 notifier = NotificationService(settings_manager)
-updater = UpdateService()
+updater = UpdateService(settings_manager)
 
 
 @app.post("/api/containers/{container_id}/check-update")
