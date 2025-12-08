@@ -18,7 +18,6 @@
 ## Features
 
 - **Real-time Container Monitoring** - View live container stats and status
-- **Container Management** - Start, stop, restart, and remove containers
 - **Manual & Auto Updates** - Check/update containers and skip exclusions
 - **Email Notifications** - Optional SMTP alerts after updates
 - **Multi-architecture Support** - `linux/amd64`, `linux/arm64`, `linux/arm/v7`
