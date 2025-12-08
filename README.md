@@ -135,8 +135,6 @@ This project is released under the **Light House Source-Available License v1.0**
 
 ## TODO / Ideas
 - Create login page for UI
-- Support custom registry credentials per container.
-- Implement WebSocket live updates for container status and update results.
+- ~~Support custom registry credentials~~
 - Improve scheduler UI: show detailed history and allow pause/resume.
 - Add image cleanup after updates (configurable retention).
-- Support custom registry credentials per container.
