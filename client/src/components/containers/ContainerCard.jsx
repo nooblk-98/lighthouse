@@ -64,17 +64,17 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion }
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow flex flex-col h-full">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center space-x-3">
-          <div className={`p-2 rounded-full ${isRunning ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+        <div className="flex items-center space-x-3 min-w-0 flex-1">
+          <div className={`p-2 rounded-full flex-shrink-0 ${isRunning ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
             <Box size={24} />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h3 className="text-lg font-semibold text-gray-900 break-words">{container.name}</h3>
-            <p className="text-sm text-gray-500 font-mono truncate max-w-xs" title={container.image}>{container.image}</p>
+            <p className="text-sm text-gray-500 font-mono truncate" title={container.image}>{container.image}</p>
             <p className="text-xs text-gray-500 mt-1">Created: {createdDisplay}</p>
           </div>
         </div>
-        <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${isRunning ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+        <span className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0 ${isRunning ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
           {container.status}
         </span>
       </div>
