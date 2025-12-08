@@ -16,4 +16,3 @@ server/__pycache__/
 server/.venv
 server/*.pyc
 settings.json
-server/settings.json
