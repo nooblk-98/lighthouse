@@ -3,7 +3,7 @@
   
   # Lighthouse
   
-  A process for automating Docker container base image updates.
+  A process for automating Docker container base image updates ( alternative to watchtower ).
 <br/><br/>
 
 [![CI](https://github.com/nooblk-98/lighthouse/actions/workflows/ci.yml/badge.svg)](https://github.com/nooblk-98/lighthouse/actions/workflows/ci.yml)
