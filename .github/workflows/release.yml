@@ -21,8 +21,8 @@ jobs:
         uses: anothrNick/github-tag-action@1.71.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BUMP: patch            # or set MAJOR/MINOR/PATCH via commit message like #major
-          WITH_V: true                   # tags look like v1.2.3
+          DEFAULT_BUMP: patch
+          WITH_V: true      
           RELEASE_BRANCHES: main
 
       - name: Create GitHub Release
