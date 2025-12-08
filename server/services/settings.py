@@ -22,6 +22,10 @@ DEFAULT_SETTINGS = {
     "smtp_from": "",
     "smtp_to": "",
     "smtp_use_tls": True,
+    "dockerhub_username": "",
+    "dockerhub_token": "",
+    "ghcr_username": "",
+    "ghcr_token": "",
 }
 
 class SettingsManager:
@@ -89,6 +93,11 @@ class SettingsManager:
             value = self.settings.get(boolean_key)
             if isinstance(value, str):
                 self.settings[boolean_key] = value.lower() in ["true", "1", "yes", "on"]
+
+        # Ensure registry credential keys exist
+        for key in ["dockerhub_username", "dockerhub_token", "ghcr_username", "ghcr_token"]:
+            if key not in self.settings:
+                self.settings[key] = ""
 
     def is_excluded(self, container_name: str) -> bool:
         excluded = self.settings.get("excluded_containers", [])

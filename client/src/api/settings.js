@@ -7,3 +7,9 @@ export const saveSettings = (payload) =>
     method: 'POST',
     body: JSON.stringify(payload),
   });
+
+export const validateRegistry = ({ provider, username, token }) =>
+  request('/registries/validate', {
+    method: 'POST',
+    body: JSON.stringify({ provider, username, token }),
+  });

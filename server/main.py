@@ -43,6 +43,11 @@ class ContainerInfo(BaseModel):
 class ContainerExclusion(BaseModel):
     excluded: bool
 
+class RegistryCredentials(BaseModel):
+    provider: str
+    username: str
+    token: str
+
 
 @app.get("/")
 def read_root():
@@ -139,6 +144,25 @@ def update_settings(new_settings: dict):
     updated = settings_manager.update(new_settings)
     scheduler.update_settings()
     return updated
+
+
+@app.post("/api/registries/validate")
+def validate_registry(creds: RegistryCredentials):
+    if not client:
+        raise HTTPException(status_code=500, detail="Docker client not connected")
+
+    provider = creds.provider.lower()
+    registry_url = "https://index.docker.io/v1/" if provider == "dockerhub" else "ghcr.io" if provider == "ghcr" else None
+    if provider not in {"dockerhub", "ghcr"} or not registry_url:
+        raise HTTPException(status_code=400, detail="Unsupported registry provider")
+
+    try:
+        client.login(username=creds.username, password=creds.token, registry=registry_url)
+        return {"valid": True, "message": "Credentials are valid."}
+    except docker.errors.APIError as e:
+        raise HTTPException(status_code=400, detail=f"Registry authentication failed: {e.explanation or str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Registry authentication failed: {str(e)}")
 
 
 @app.post("/api/containers/{container_id}/update")

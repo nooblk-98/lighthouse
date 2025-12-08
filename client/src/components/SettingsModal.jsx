@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, Save, Bell, Settings2, Mail, ShieldCheck } from 'lucide-react';
 import { DEFAULT_SETTINGS } from '../constants/settings';
+import { validateRegistry } from '../api/settings';
 
 const SectionTitle = ({ icon: Icon, title, description }) => (
   <div className="flex items-start gap-3 mb-4">
@@ -123,6 +124,13 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     setActiveSection('registries');
     setRegistryStatus((prev) => ({ ...prev, [provider]: { state: 'validating', message: 'Validating credentials...' } }));
     try {
+      const username = formData[`${provider}_username`];
+      const token = formData[`${provider}_token`];
+      const validation = await validateRegistry({ provider, username, token });
+      if (!validation?.valid) {
+        throw new Error(validation?.message || 'Validation failed');
+      }
+
       const updated = await onSave(formData);
       if (updated) {
         setFormData(updated);
@@ -131,7 +139,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     } catch (err) {
       setRegistryStatus((prev) => ({
         ...prev,
-        [provider]: { state: 'error', message: err.message || 'Failed to save credentials.' },
+        [provider]: { state: 'error', message: err.message || 'Failed to validate credentials.' },
       }));
     }
   };
