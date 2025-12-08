@@ -9,11 +9,12 @@ logger = logging.getLogger(__name__)
 from services.cache import StatusCache
 
 class SchedulerService:
-    def __init__(self, settings_manager: SettingsManager, update_service: UpdateService, status_cache: StatusCache):
+    def __init__(self, settings_manager: SettingsManager, update_service: UpdateService, status_cache: StatusCache, notifier=None):
         self.scheduler = BackgroundScheduler()
         self.settings = settings_manager
         self.updater = update_service
         self.cache = status_cache
+        self.notifier = notifier
         self.job = None
 
     def start(self):
@@ -67,6 +68,11 @@ class SchedulerService:
                             logger.info(f"Auto-updating {container.name}...")
                             update_res = self.updater.update_container(container.id)
                             logger.info(f"Update result: {update_res}")
+                            if self.notifier:
+                                try:
+                                    self.notifier.send_update_notification(container.name, update_res)
+                                except Exception as notify_err:
+                                    logger.error(f"Notification failed for {container.name}: {notify_err}")
                             
                             if update_res.get("success") and cleanup:
                                 # Prune old image?

@@ -14,6 +14,14 @@ DEFAULT_SETTINGS = {
         "lighthouse-frontend",
         "lighthouse-backend",
     ],
+    "notifications_enabled": False,
+    "smtp_host": "",
+    "smtp_port": 587,
+    "smtp_username": "",
+    "smtp_password": "",
+    "smtp_from": "",
+    "smtp_to": "",
+    "smtp_use_tls": True,
 }
 
 class SettingsManager:
@@ -75,6 +83,12 @@ class SettingsManager:
             cleaned = DEFAULT_SETTINGS["excluded_containers"].copy()
 
         self.settings["excluded_containers"] = cleaned
+
+        # Normalize booleans that might come as strings from the UI
+        for boolean_key in ["notifications_enabled", "smtp_use_tls", "auto_update_enabled", "cleanup_enabled"]:
+            value = self.settings.get(boolean_key)
+            if isinstance(value, str):
+                self.settings[boolean_key] = value.lower() in ["true", "1", "yes", "on"]
 
     def is_excluded(self, container_name: str) -> bool:
         excluded = self.settings.get("excluded_containers", [])

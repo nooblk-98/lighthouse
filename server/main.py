@@ -87,6 +87,15 @@ def list_containers():
 
 
 from services.updater import UpdateService
+from services.notifications import NotificationService
+
+from services.cache import StatusCache
+status_cache = StatusCache()
+
+from services.settings import SettingsManager
+settings_manager = SettingsManager()
+
+notifier = NotificationService(settings_manager)
 updater = UpdateService()
 
 
@@ -104,15 +113,10 @@ def check_update(container_id: str):
     return result
 
 
-from services.cache import StatusCache
-status_cache = StatusCache()
-
-from services.settings import SettingsManager
 from services.scheduler import SchedulerService
 
-settings_manager = SettingsManager()
 # Pass updater to scheduler
-scheduler = SchedulerService(settings_manager, updater, status_cache)
+scheduler = SchedulerService(settings_manager, updater, status_cache, notifier)
 
 
 @app.on_event("startup")
@@ -141,6 +145,7 @@ def perform_update(container_id: str):
     result = updater.update_container(container_id)
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error"))
+    notifier.send_update_notification(container.name, result)
     return result
 
 
@@ -205,6 +210,7 @@ def update_all_containers():
                     "status": "updated",
                     "message": update_result.get("message", "Updated successfully"),
                 })
+                notifier.send_update_notification(name, update_result)
                 status_cache.update(c.id, {
                     "update_available": False,
                     "current_id": check_result.get("latest_id"),

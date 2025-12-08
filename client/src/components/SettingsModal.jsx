@@ -110,6 +110,113 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 Automatically remove old images after a successful update to save space.
               </p>
             </div>
+
+            <div className="pt-2 border-t">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 font-medium">Email notifications</span>
+                <button
+                  type="button"
+                  onClick={() => toggleFlag('notifications_enabled')}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                    formData.notifications_enabled ? 'bg-emerald-500' : 'bg-gray-300'
+                  }`}
+                  aria-pressed={formData.notifications_enabled}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                      formData.notifications_enabled ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Send an email after each container update.
+              </p>
+
+              <div className="grid grid-cols-1 gap-3 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Host</label>
+                  <input
+                    type="text"
+                    name="smtp_host"
+                    value={formData.smtp_host}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Port</label>
+                  <input
+                    type="number"
+                    name="smtp_port"
+                    value={formData.smtp_port}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input
+                      type="text"
+                      name="smtp_username"
+                      value={formData.smtp_username}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input
+                      type="password"
+                      name="smtp_password"
+                      value={formData.smtp_password}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">From</label>
+                    <input
+                      type="email"
+                      name="smtp_from"
+                      value={formData.smtp_from}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
+                    <input
+                      type="email"
+                      name="smtp_to"
+                      value={formData.smtp_to}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Use TLS</span>
+                  <button
+                    type="button"
+                    onClick={() => toggleFlag('smtp_use_tls')}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                      formData.smtp_use_tls ? 'bg-emerald-500' : 'bg-gray-300'
+                    }`}
+                    aria-pressed={formData.smtp_use_tls}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                        formData.smtp_use_tls ? 'translate-x-5' : 'translate-x-0.5'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 flex justify-end space-x-3">

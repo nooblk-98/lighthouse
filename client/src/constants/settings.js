@@ -3,4 +3,12 @@ export const DEFAULT_SETTINGS = {
   auto_update_enabled: false,
   cleanup_enabled: false,
   excluded_containers: ['lighthouse-frontend', 'lighthouse-backend'],
+  notifications_enabled: false,
+  smtp_host: '',
+  smtp_port: 587,
+  smtp_username: '',
+  smtp_password: '',
+  smtp_from: '',
+  smtp_to: '',
+  smtp_use_tls: true,
 };

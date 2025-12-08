@@ -5,5 +5,13 @@
     "excluded_containers": [
         "lighthouse-backend",
         "lighthouse-frontend"
-    ]
+    ],
+    "notifications_enabled": false,
+    "smtp_host": "",
+    "smtp_port": 587,
+    "smtp_username": "",
+    "smtp_password": "",
+    "smtp_from": "",
+    "smtp_to": "",
+    "smtp_use_tls": true
 }
