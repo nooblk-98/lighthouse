@@ -1,37 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Save } from 'lucide-react';
+import { DEFAULT_SETTINGS } from '../constants/settings';
 
-const SettingsModal = ({ isOpen, onClose, settings, onSave }) => {
-  const [formData, setFormData] = useState(settings || {
-    check_interval_minutes: 60,
-    auto_update_enabled: false,
-    cleanup_enabled: false
+const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, loading }) => {
+  const [formData, setFormData] = useState({
+    ...DEFAULT_SETTINGS,
+    ...settings,
   });
   const [saving, setSaving] = useState(false);
-
-  // Sync state with props when settings change
-  useEffect(() => {
-    if (settings) {
-      setFormData(settings);
-    }
-  }, [settings]);
 
   if (!isOpen) return null;
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    await onSave(formData);
-    setSaving(false);
-    onClose();
+    try {
+      await onSave(formData);
+      onClose();
+    } catch (err) {
+      alert(err.message || 'Failed to save settings.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -103,7 +101,7 @@ const SettingsModal = ({ isOpen, onClose, settings, onSave }) => {
             </button>
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || loading}
               className="flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
             >
               <Save size={16} className="mr-2" />
