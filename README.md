@@ -35,20 +35,11 @@
 
 ### Installation
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/nooblk-98/lighthouse.git
-   cd lighthouse
-   ```
-
-2. Run using pre-built images
+Run using pre-built images
    ```bash
    docker-compose -f docker-compose.live.yml up -d
    ```
 
-3. Access the application
-   - Frontend: `http://localhost:8066`
-   - Backend API: internal `http://backend:8000`
 
 ## Docker Compose (pre-built images)
 
