@@ -1,12 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RefreshCw, Box, AlertCircle, CheckCircle } from 'lucide-react';
 
-const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion }) => {
+const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, bulkStatus }) => {
   const [checking, setChecking] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [updateStatus, setUpdateStatus] = useState(null);
   const [updateResult, setUpdateResult] = useState(null);
+
+  useEffect(() => {
+    if (bulkStatus) {
+      if (bulkStatus.status === 'updated') {
+        setUpdateResult({ success: true, message: bulkStatus.message || 'Container updated successfully' });
+        setUpdateStatus(null);
+      } else if (bulkStatus.status === 'error') {
+        setUpdateResult({ success: false, error: bulkStatus.message || bulkStatus.reason });
+      } else if (bulkStatus.status === 'up_to_date') {
+        setUpdateStatus({ update_available: false });
+      } else if (bulkStatus.status === 'skipped') {
+        setUpdateStatus({ skipped: true, reason: bulkStatus.reason || bulkStatus.message });
+      }
+    }
+  }, [bulkStatus]);
 
   const isExcluded = !!container.excluded;
   const isRunning = container.state === 'running';
