@@ -92,6 +92,14 @@ Run with compose:
 docker-compose -f docker-compose.live.yml up -d
 ```
 
+## UI Preview
+
+<div align="center">
+  <img src="./images/ui/ui_1.png" alt="Lighthouse UI preview 1" width="800" />
+  <br/><br/>
+  <img src="./images/ui/ui_2.png" alt="Lighthouse UI preview 2" width="800" />
+</div>
+
 ## Development
 
 ### Run locally without Docker
