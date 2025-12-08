@@ -546,23 +546,24 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       placeholder="Required for export and import"
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">Export format</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Export format</label>
                       <select
                         value={backupFormat}
                         onChange={(e) => setBackupFormat(e.target.value)}
-                        className="w-full px-3 h-11 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
                       >
                         <option value="json">JSON</option>
                         <option value="yaml">YAML</option>
                       </select>
                     </div>
-                    <div className="w-full">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">&nbsp;</label>
                       <button
                         type="button"
                         onClick={handleExport}
-                        className="inline-flex items-center justify-center px-3 w-full h-11 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                        className="inline-flex items-center justify-center px-4 py-2 w-full text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
                       >
                         <Download size={16} className="mr-2" />
                         Export backup
@@ -593,10 +594,10 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       placeholder="Password used when exporting"
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-                    <div className="md:col-span-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Backup file</label>
-                      <label className="flex items-center justify-between px-3 h-11 border border-gray-300 rounded-md bg-white cursor-pointer text-sm font-medium text-gray-700 hover:border-indigo-400 transition">
+                      <label className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer text-sm text-gray-700 hover:border-indigo-400 transition">
                         <span className="truncate">{fileInputRef.current?.files?.[0]?.name || 'Choose backup file'}</span>
                         <input
                           ref={fileInputRef}
@@ -615,11 +616,12 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                         JSON or YAML backup
                       </div>
                     </div>
-                    <div className="w-full">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">&nbsp;</label>
                       <button
                         type="button"
                         onClick={handleImport}
-                        className="inline-flex items-center justify-center px-3 w-full h-11 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
+                        className="inline-flex items-center justify-center px-4 py-2 w-full text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
                       >
                         <Upload size={16} className="mr-2" />
                         Import backup
