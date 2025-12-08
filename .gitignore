@@ -15,4 +15,3 @@ client/node_modules
 server/__pycache__/
 server/.venv
 server/*.pyc
-settings.json
