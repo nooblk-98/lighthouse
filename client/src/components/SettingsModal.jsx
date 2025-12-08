@@ -546,8 +546,8 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       placeholder="Required for export and import"
                     />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <div className="sm:col-span-2">
                       <label className="block text-sm font-medium text-gray-700">Export format</label>
                       <select
                         value={backupFormat}
@@ -558,11 +558,11 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                         <option value="yaml">YAML</option>
                       </select>
                     </div>
-                    <div className="flex items-end">
+                    <div className="w-full">
                       <button
                         type="button"
                         onClick={handleExport}
-                        className="inline-flex items-center justify-center px-3 py-2 w-full text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                        className="inline-flex items-center justify-center px-3 py-2 w-full h-11 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
                       >
                         <Download size={16} className="mr-2" />
                         Export backup
@@ -593,35 +593,41 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       placeholder="Password used when exporting"
                     />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
-                    <div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <div className="sm:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Backup file</label>
-                      <label className="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer text-sm font-medium text-gray-700 hover:border-indigo-400 transition">
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept=".json,.yaml,.yml"
-                          className="hidden"
-                          onChange={() => {
-                            if (fileInputRef.current?.files?.[0]) {
-                              setImportStatus(null);
-                            }
-                          }}
-                        />
-                        Choose backup file
-                      </label>
+                      <div className="flex items-stretch gap-2">
+                        <label className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer text-sm font-medium text-gray-700 hover:border-indigo-400 transition">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".json,.yaml,.yml"
+                            className="hidden"
+                            onChange={() => {
+                              if (fileInputRef.current?.files?.[0]) {
+                                setImportStatus(null);
+                              }
+                              // force re-render to show filename
+                              setFormData((prev) => ({ ...prev }));
+                            }}
+                          />
+                          Choose backup file
+                        </label>
+                      </div>
                       <div className="text-xs text-gray-500 mt-1">
                         {fileInputRef.current?.files?.[0]?.name || 'JSON or YAML backup'}
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleImport}
-                      className="inline-flex items-center justify-center px-3 py-2 w-full text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
-                    >
-                      <Upload size={16} className="mr-2" />
-                      Import backup
-                    </button>
+                    <div className="w-full">
+                      <button
+                        type="button"
+                        onClick={handleImport}
+                        className="inline-flex items-center justify-center px-3 py-2 w-full h-11 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        <Upload size={16} className="mr-2" />
+                        Import backup
+                      </button>
+                    </div>
                   </div>
                   {importStatus ? (
                     <div className={`text-sm rounded-md px-3 py-2 ${statusClasses(importStatus.type)}`}>
@@ -633,23 +639,25 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
             </div>
           ) : null}
 
-          <div className="pt-4 flex justify-end gap-3 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving || loading}
-              className="flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-            >
-              <Save size={16} className="mr-2" />
-              {saving ? 'Saving...' : 'Save Settings'}
-            </button>
-          </div>
+          {activeSection !== 'backup' ? (
+            <div className="pt-4 flex justify-end gap-3 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving || loading}
+                className="flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              >
+                <Save size={16} className="mr-2" />
+                {saving ? 'Saving...' : 'Save Settings'}
+              </button>
+            </div>
+          ) : null}
         </form>
       </div>
     </div>
