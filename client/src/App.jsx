@@ -9,6 +9,8 @@ import { useContainers } from './hooks/useContainers';
 import { useSettings } from './hooks/useSettings';
 import { useSchedule } from './hooks/useSchedule';
 import ScheduleSummary from './components/layout/ScheduleSummary';
+import Footer from './components/layout/Footer';
+import { version as appVersion } from '../package.json';
 
 const POLL_INTERVAL_MS = 30000;
 
@@ -63,7 +65,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col">
       <Header
         onRefresh={refreshContainers}
         onOpenSettings={() => setSettingsOpen(true)}
@@ -74,7 +76,7 @@ function App() {
         notificationsEnabled={!!settings?.notifications_enabled}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ScheduleSummary
           scheduleEnabled={!!settings?.auto_update_enabled}
           lastCheckLabel={scheduleError ? 'Error' : formatDateLabel(schedule.last_check_time)}
@@ -173,6 +175,8 @@ function App() {
           loading={settingsLoading}
         />
       ) : null}
+
+      <Footer version={appVersion || 'dev'} />
     </div>
   );
 }
