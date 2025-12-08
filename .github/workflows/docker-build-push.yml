@@ -66,7 +66,7 @@ jobs:
             ${{ env.DOCKERHUB }}/lighthouse-ui:latest
             ${{ env.DOCKERHUB }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
             ghcr.io/${{ github.repository_owner }}/lighthouse-ui:latest
-#             ghcr.io/${{ github.repository_owner }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
+            ghcr.io/${{ github.repository_owner }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
 
 #   build-backend:
 #     runs-on: ubuntu-latest
