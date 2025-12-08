@@ -16,7 +16,10 @@ class UpdateService:
             container = self.client.containers.get(container_id)
             image_name = container.attrs['Config']['Image']
             current_image_id = container.image.id
-
+            
+            # Get current image details
+            created_date = container.image.attrs.get('Created')
+            
             # Pull the latest version of the image
             logger.info(f"Checking update for {container.name} ({image_name})...")
             try:
@@ -32,18 +35,14 @@ class UpdateService:
 
             pulled_image_id = pulled_image.id
 
-            if pulled_image_id != current_image_id:
-                return {
-                    "update_available": True,
-                    "current_id": current_image_id,
-                    "latest_id": pulled_image_id,
-                    "image": image_name
-                }
-            else:
-                return {
-                    "update_available": False,
-                    "ids_match": True
-                }
+            result = {
+                "update_available": pulled_image_id != current_image_id,
+                "current_id": current_image_id,
+                "latest_id": pulled_image_id,
+                "image": image_name,
+                "created": created_date
+            }
+            return result
 
         except docker.errors.NotFound:
             return {"error": "Container not found", "update_available": False}

@@ -35,6 +35,7 @@ class ContainerInfo(BaseModel):
     status: str
     state: str
     created: str
+    update_status: Optional[dict] = None
 
 @app.get("/")
 def read_root():
@@ -56,7 +57,8 @@ def list_containers():
                 image=str(c.image.tags[0]) if c.image.tags else c.image.id,
                 status=c.status,
                 state=c.attrs['State']['Status'],
-                created=c.attrs['Created']
+                created=c.image.attrs.get('Created'), # Use Image created date
+                update_status=status_cache.get(c.id)
             ))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -69,11 +71,33 @@ updater = UpdateService()
 @app.post("/api/containers/{container_id}/check-update")
 def check_update(container_id: str):
     result = updater.check_for_update(container_id)
-    if "error" in result:
-        # If error is critical, maybe raise HTTPException?
-        # But we return the error in JSON for UI to show
-        pass
+    if "error" not in result:
+        status_cache.update(container_id, result)
     return result
+
+from services.cache import StatusCache
+status_cache = StatusCache()
+
+from services.settings import SettingsManager
+from services.scheduler import SchedulerService
+
+settings_manager = SettingsManager()
+# Pass updater to scheduler
+scheduler = SchedulerService(settings_manager, updater, status_cache)
+
+@app.on_event("startup")
+def start_scheduler():
+    scheduler.start()
+
+@app.get("/api/settings")
+def get_settings():
+    return settings_manager.get_all()
+
+@app.post("/api/settings")
+def update_settings(new_settings: dict):
+    updated = settings_manager.update(new_settings)
+    scheduler.update_settings()
+    return updated
 
 @app.post("/api/containers/{container_id}/update")
 def perform_update(container_id: str):

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { LayoutDashboard, RefreshCcw, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, RefreshCcw, AlertCircle, Settings } from 'lucide-react';
 import ContainerCard from './components/ContainerCard';
+import SettingsModal from './components/SettingsModal';
 
 function App() {
   const [containers, setContainers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState(null);
 
   const API_URL = '/api';
 
@@ -24,8 +27,23 @@ function App() {
     }
   };
 
+  const fetchSettings = async () => {
+      try {
+          const res = await fetch(`${API_URL}/settings`);
+          const data = await res.json();
+          setSettings(data);
+      } catch (e) {
+          console.error("Failed to fetch settings", e);
+      }
+  };
+
   useEffect(() => {
     fetchContainers();
+    fetchSettings();
+
+    // Poll every 30 seconds to keep list updated (e.g. for background scans)
+    const interval = setInterval(fetchContainers, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleCheckUpdate = async (id) => {
@@ -38,10 +56,23 @@ function App() {
       const res = await fetch(`${API_URL}/containers/${id}/update`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-          // Refresh list after successful update
           fetchContainers();
       }
       return data;
+  };
+
+  const handleSaveSettings = async (newSettings) => {
+      try {
+          const res = await fetch(`${API_URL}/settings`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newSettings)
+          });
+          const data = await res.json();
+          setSettings(data);
+      } catch (e) {
+          alert("Failed to save settings: " + e.message);
+      }
   };
 
   return (
@@ -53,13 +84,22 @@ function App() {
                 <LayoutDashboard className="text-indigo-600" size={28} />
                 <h1 className="text-2xl font-bold text-gray-900">Light House</h1>
             </div>
-            <button 
-                onClick={fetchContainers}
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                title="Refresh List"
-            >
-                <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
-            </button>
+            <div className="flex items-center space-x-2">
+                <button 
+                    onClick={() => setSettingsOpen(true)}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+                    title="Settings"
+                >
+                    <Settings size={20} />
+                </button>
+                <button 
+                    onClick={fetchContainers}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+                    title="Refresh List"
+                >
+                    <RefreshCcw size={20} className={loading ? 'animate-spin' : ''} />
+                </button>
+            </div>
         </div>
       </header>
 
@@ -73,7 +113,7 @@ function App() {
                     </div>
                     <div className="ml-3">
                         <p className="text-sm text-red-700">{error}</p>
-                        <p className="text-xs text-red-600 mt-1">Make sure the backend is running on port 8000.</p>
+                        <p className="text-xs text-red-600 mt-1">Make sure the backend is running.</p>
                     </div>
                 </div>
             </div>
@@ -102,15 +142,17 @@ function App() {
             </div>
         )}
       </main>
+
+      {settings && (
+        <SettingsModal 
+            isOpen={settingsOpen} 
+            onClose={() => setSettingsOpen(false)}
+            settings={settings}
+            onSave={handleSaveSettings}
+        />
+      )}
     </div>
   );
 }
-
-// Basic import for Error component (AlertCircle usage fix if missing import)
-// Wait, I imported AlertCircle in ContainerCard but not App? 
-// Actually I imported Update functionality.
-// Let me double check imports in the code block above.
-// Only LayoutDashboard and RefreshCcw are imported in App.
-// I used AlertCircle in error block. I should add it to imports.
 
 export default App;
