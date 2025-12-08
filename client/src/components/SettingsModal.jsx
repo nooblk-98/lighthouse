@@ -233,6 +233,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     { id: 'general', label: 'General', icon: Settings2 },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'registries', label: 'Registries', icon: ShieldCheck },
+    { id: 'backup', label: 'Backup', icon: Shield },
   ]), []);
 
   return (
@@ -518,87 +519,119 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
             </div>
           ) : null}
 
-          <div className="mt-8 border-t pt-6 space-y-4">
-            <div className="flex items-center space-x-2 text-gray-800">
-              <Shield size={18} />
-              <h3 className="text-lg font-semibold">Backup &amp; Restore</h3>
+          {activeSection === 'backup' ? (
+            <div className="space-y-6">
+              <SectionTitle
+                icon={Shield}
+                title="Backup &amp; Restore"
+                description="Encrypted backups keep all settings (including credentials) safe to move between installs."
+              />
+
+              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <Download size={16} />
+                  Export encrypted backup
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Encryption password</label>
+                    <input
+                      type="password"
+                      value={backupPassword}
+                      onChange={(e) => {
+                        setBackupPassword(e.target.value);
+                        setImportPassword(e.target.value);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Required for export and import"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Export format</label>
+                      <select
+                        value={backupFormat}
+                        onChange={(e) => setBackupFormat(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                      >
+                        <option value="json">JSON</option>
+                        <option value="yaml">YAML</option>
+                      </select>
+                    </div>
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={handleExport}
+                        className="inline-flex items-center justify-center px-3 py-2 w-full text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                      >
+                        <Download size={16} className="mr-2" />
+                        Export backup
+                      </button>
+                    </div>
+                  </div>
+                  {backupStatus ? (
+                    <div className={`text-sm rounded-md px-3 py-2 ${statusClasses(backupStatus.type)}`}>
+                      {backupStatus.message}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <Upload size={16} />
+                  Import backup
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Encryption password</label>
+                    <input
+                      type="password"
+                      value={importPassword}
+                      onChange={(e) => setImportPassword(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Password used when exporting"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Backup file</label>
+                      <label className="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer text-sm font-medium text-gray-700 hover:border-indigo-400 transition">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".json,.yaml,.yml"
+                          className="hidden"
+                          onChange={() => {
+                            if (fileInputRef.current?.files?.[0]) {
+                              setImportStatus(null);
+                            }
+                          }}
+                        />
+                        Choose backup file
+                      </label>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {fileInputRef.current?.files?.[0]?.name || 'JSON or YAML backup'}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleImport}
+                      className="inline-flex items-center justify-center px-3 py-2 w-full text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                      <Upload size={16} className="mr-2" />
+                      Import backup
+                    </button>
+                  </div>
+                  {importStatus ? (
+                    <div className={`text-sm rounded-md px-3 py-2 ${statusClasses(importStatus.type)}`}>
+                      {importStatus.message}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-gray-600">
-              Export settings (including credentials) to an encrypted JSON or YAML file, or import a previously saved backup.
-            </p>
-
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 gap-3">
-                <label className="block text-sm font-medium text-gray-700">Encryption password</label>
-                <input
-                  type="password"
-                  value={backupPassword}
-                  onChange={(e) => {
-                    setBackupPassword(e.target.value);
-                    setImportPassword(e.target.value);
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Required for export and import"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Export format</label>
-                  <select
-                    value={backupFormat}
-                    onChange={(e) => setBackupFormat(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-                  >
-                    <option value="json">JSON</option>
-                    <option value="yaml">YAML</option>
-                  </select>
-                </div>
-                <div className="flex items-end">
-                  <button
-                    type="button"
-                    onClick={handleExport}
-                    className="inline-flex items-center justify-center px-3 py-2 w-full text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                  >
-                    <Download size={16} className="mr-2" />
-                    Export encrypted backup
-                  </button>
-                </div>
-              </div>
-              {backupStatus ? (
-                <div className={`text-sm rounded-md px-3 py-2 ${statusClasses(backupStatus.type)}`}>
-                  {backupStatus.message}
-                </div>
-              ) : null}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Backup file</label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".json,.yaml,.yml"
-                    className="w-full text-sm text-gray-700"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <button
-                    type="button"
-                    onClick={handleImport}
-                    className="inline-flex items-center justify-center px-3 py-2 w-full text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
-                  >
-                    <Upload size={16} className="mr-2" />
-                    Import backup
-                  </button>
-                </div>
-              </div>
-              {importStatus ? (
-                <div className={`text-sm rounded-md px-3 py-2 ${statusClasses(importStatus.type)}`}>
-                  {importStatus.message}
-                </div>
-              ) : null}
-            </div>
-          </div>
+          ) : null}
 
           <div className="pt-4 flex justify-end gap-3 border-t border-gray-200">
             <button
