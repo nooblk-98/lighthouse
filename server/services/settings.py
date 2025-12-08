@@ -66,6 +66,11 @@ class SettingsManager:
 
     def _normalize(self):
         """Ensure settings contain valid shapes and defaults."""
+        # Ensure all default keys exist with their default values if missing
+        for key, default_value in DEFAULT_SETTINGS.items():
+            if key not in self.settings:
+                self.settings[key] = copy.deepcopy(default_value)
+        
         excluded = self.settings.get("excluded_containers")
         if not isinstance(excluded, list):
             excluded = []
@@ -93,6 +98,8 @@ class SettingsManager:
             value = self.settings.get(boolean_key)
             if isinstance(value, str):
                 self.settings[boolean_key] = value.lower() in ["true", "1", "yes", "on"]
+            elif value is None:
+                self.settings[boolean_key] = DEFAULT_SETTINGS.get(boolean_key, False)
 
         # Ensure registry credential keys exist
         for key in ["dockerhub_username", "dockerhub_token", "ghcr_username", "ghcr_token"]:
