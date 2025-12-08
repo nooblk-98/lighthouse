@@ -29,6 +29,9 @@ jobs:
   build-frontend:
     runs-on: ubuntu-latest
     needs: get-release-tag
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -38,6 +41,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -52,4 +62,8 @@ jobs:
           file: ./client/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.DOCKERHUB }}/lighthouse-ui:latest,${{ env.DOCKERHUB }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
+          tags: |
+            ${{ env.DOCKERHUB }}/lighthouse-ui:latest
+            ${{ env.DOCKERHUB }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
+            ghcr.io/${{ github.repository_owner }}/lighthouse-ui:latest
+            ghcr.io/${{ github.repository_owner }}/lighthouse-ui:${{ needs.get-release-tag.outputs.tag_name }}
