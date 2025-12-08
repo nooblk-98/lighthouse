@@ -1,0 +1,36 @@
+name: Release
+
+on:
+#   push:
+#     branches:
+#       - main
+    workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Auto tag & release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump tag automatically
+        id: tag
+        uses: anothrNick/github-tag-action@1.71.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch            # or set MAJOR/MINOR/PATCH via commit message like #major
+          WITH_V: true                   # tags look like v1.2.3
+          RELEASE_BRANCHES: main
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: steps.tag.outputs.new_tag != ''
+        with:
+          tag_name: ${{ steps.tag.outputs.new_tag }}
+          generate_release_notes: true
