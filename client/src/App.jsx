@@ -102,23 +102,34 @@ function App() {
               </div>
 
               {bulkResult ? (
-                <div className="mt-3">
+                <div className="mt-4 space-y-3">
                   {bulkResult.error ? (
                     <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">
                       {bulkResult.error}
                     </div>
                   ) : (
                     <>
-                      <div className="text-sm text-gray-700">
-                        Updated: {bulkResult.summary?.updated ?? 0} • Up to date: {bulkResult.summary?.up_to_date ?? 0} • Skipped: {bulkResult.summary?.skipped ?? 0} • Errors: {bulkResult.summary?.errors ?? 0}
+                      <div className="flex flex-wrap gap-3 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded p-3">
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-emerald-100 text-emerald-800">
+                          Updated: {bulkResult.summary?.updated ?? 0}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800">
+                          Up to date: {bulkResult.summary?.up_to_date ?? 0}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-700">
+                          Skipped: {bulkResult.summary?.skipped ?? 0}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-red-100 text-red-800">
+                          Errors: {bulkResult.summary?.errors ?? 0}
+                        </span>
                       </div>
-                      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                         {bulkResult.results?.map((item) => (
-                          <div key={item.id} className="border border-gray-200 rounded p-2 bg-gray-50">
+                          <div key={item.id} className="border border-gray-200 rounded p-3 bg-white shadow-xs">
                             <div className="font-medium text-gray-900">{item.name}</div>
                             <div className="text-xs text-gray-600 capitalize">Status: {item.status}</div>
-                            {item.message ? <div className="text-xs text-gray-600">{item.message}</div> : null}
-                            {item.reason ? <div className="text-xs text-gray-600">{item.reason}</div> : null}
+                            {item.message ? <div className="text-xs text-gray-600 mt-1">{item.message}</div> : null}
+                            {item.reason ? <div className="text-xs text-gray-600 mt-1">{item.reason}</div> : null}
                           </div>
                         ))}
                       </div>
