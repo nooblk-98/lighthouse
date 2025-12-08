@@ -4,11 +4,13 @@ services:
   backend:
     build: ./server
     container_name: lighthouse-backend
-    ports:
-      - "8000:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
+    expose:
+      - "8000"
+    networks:
+      - lighthouse-net
 
   frontend:
     build: ./client
@@ -18,3 +20,9 @@ services:
     depends_on:
       - backend
     restart: always
+    networks:
+      - lighthouse-net
+
+networks:
+  lighthouse-net:
+    driver: bridge
