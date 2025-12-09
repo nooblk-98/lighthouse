@@ -20,6 +20,12 @@ export const validateSmtp = ({ host, port, username, password, use_tls }) =>
     body: JSON.stringify({ host, port, username, password, use_tls }),
   });
 
+export const sendTestEmail = (message) =>
+  request('/notifications/test', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  });
+
 export const exportSettingsBackup = ({ password, format = 'json' }) =>
   requestBlob('/settings/export', {
     method: 'POST',

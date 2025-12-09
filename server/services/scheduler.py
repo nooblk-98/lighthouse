@@ -120,6 +120,11 @@ class SchedulerService:
                                     details={"image": result.get("image"), "new_id": update_res.get("new_id")},
                                 )
                             else:
+                                if self.notifier:
+                                    try:
+                                        self.notifier.send_update_notification(container.name, {**update_res, "success": False, "message": update_res.get("error", "Update failed")})
+                                    except Exception as notify_err:
+                                        logger.error(f"Notification failed for {container.name}: {notify_err}")
                                 self._record(
                                     action="auto_update",
                                     status="error",

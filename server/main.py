@@ -67,6 +67,9 @@ class SettingsImport(BaseModel):
     password: str
     content: str
 
+class TestNotification(BaseModel):
+    message: str | None = None
+
 
 @app.get("/")
 def read_root():
@@ -244,6 +247,16 @@ def validate_smtp(creds: SmtpCredentials):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"SMTP validation failed: {str(e)}")
 
+@app.post("/api/notifications/test")
+def send_test_notification(payload: TestNotification = None):
+    try:
+        msg = payload.message if payload else None
+        return notifier.send_test_notification(msg or "Test email from Lighthouse.")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send test email: {e}")
+
 
 @app.post("/api/settings/export")
 def export_settings(payload: SettingsExport):
@@ -354,6 +367,10 @@ def update_all_containers():
                     "status": "error",
                     "message": check_result.get("error"),
                 })
+                try:
+                    notifier.send_update_notification(name, {**check_result, "success": False, "message": check_result.get("error")})
+                except Exception:
+                    pass
                 status_cache.update(name, check_result)
                 history_service.log_event(
                     action="bulk_update",

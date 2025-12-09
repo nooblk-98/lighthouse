@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { X, Save, Bell, Settings2, Mail, ShieldCheck, Download, Upload, Shield } from 'lucide-react';
 import { DEFAULT_SETTINGS } from '../constants/settings';
-import { validateRegistry, validateSmtp, exportSettingsBackup, importSettingsBackup } from '../api/settings';
+import { validateRegistry, validateSmtp, exportSettingsBackup, importSettingsBackup, sendTestEmail } from '../api/settings';
 
 const SectionTitle = ({ icon: Icon, title, description }) => (
   <div className="flex items-start gap-3 mb-4">
@@ -224,7 +224,9 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
       if (!res?.valid) {
         throw new Error(res?.message || 'Validation failed');
       }
-      setSmtpStatus({ state: 'success', message: res.message || 'SMTP validated.' });
+      setSmtpStatus({ state: 'validating', message: 'Validated. Sending test email...' });
+      await sendTestEmail('SMTP validated, sending test email.');
+      setSmtpStatus({ state: 'success', message: 'SMTP validated and test email sent.' });
     } catch (err) {
       setSmtpStatus({ state: 'error', message: err.message || 'SMTP validation failed.' });
     }
@@ -340,7 +342,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                   className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
                   disabled={smtpStatus.state === 'validating' || loading}
                 >
-                  {smtpStatus.state === 'validating' ? 'Validating...' : 'Validate SMTP'}
+                  {smtpStatus.state === 'validating' ? 'Working...' : 'Validate SMTP & send test'}
                 </button>
               </div>
 
