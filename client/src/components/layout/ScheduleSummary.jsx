@@ -8,9 +8,9 @@ const ScheduleSummary = ({ scheduleEnabled, lastCheckLabel, nextCheckLabel }) =>
   if (!scheduleEnabled) {
     return (
       <div className="mb-6">
-        <div className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 shadow-xs">
-          <Clock3 size={16} className="text-gray-500" />
-          <span>Scheduling is turned off. Enable auto-update to see upcoming checks.</span>
+        <div className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+          <Clock3 size={16} className="text-slate-500 dark:text-slate-400" />
+          <span className="text-slate-700 dark:text-slate-200">Scheduling is turned off. Enable auto-update to see upcoming checks.</span>
         </div>
       </div>
     );
@@ -18,25 +18,25 @@ const ScheduleSummary = ({ scheduleEnabled, lastCheckLabel, nextCheckLabel }) =>
 
   return (
     <div className="mb-6">
-      <div className="flex flex-wrap items-stretch gap-4 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-2 text-gray-800">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-            <Clock3 size={18} />
+      <div className="flex flex-wrap items-center gap-6 rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center gap-3 text-slate-800 dark:text-slate-200">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-indigo-500 dark:bg-slate-800 dark:text-indigo-300">
+            <Clock3 size={16} />
           </span>
-          <div>
-            <div className="text-xs uppercase tracking-wide text-gray-500">Last check</div>
+          <div className="space-y-1">
+            <div className="text-[11px] uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400">Last check</div>
             <div className="text-sm font-semibold">{lastLabel}</div>
           </div>
         </div>
 
-        <div className="hidden h-12 w-px bg-gray-200 sm:block" />
+        <span className="hidden h-10 w-px bg-slate-200 dark:bg-slate-800 sm:block" />
 
-        <div className="flex items-center gap-2 text-gray-800">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-            <Clock3 size={18} />
+        <div className="flex items-center gap-3 text-slate-800 dark:text-slate-200">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-emerald-600 dark:bg-slate-800 dark:text-emerald-300">
+            <Clock3 size={16} />
           </span>
-          <div>
-            <div className="text-xs uppercase tracking-wide text-gray-500">Next check</div>
+          <div className="space-y-1">
+            <div className="text-[11px] uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400">Next check</div>
             <div className="text-sm font-semibold">{nextLabel}</div>
           </div>
         </div>

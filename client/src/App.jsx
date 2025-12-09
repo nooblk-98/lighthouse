@@ -12,6 +12,7 @@ import HistoryView from './components/history/HistoryView';
 import ScheduleSummary from './components/layout/ScheduleSummary';
 import Footer from './components/layout/Footer';
 import { useHistoryLog } from './hooks/useHistoryLog';
+import { useTheme } from './hooks/useTheme';
 import { version as appVersion } from '../package.json';
 
 const POLL_INTERVAL_MS = 30000;
@@ -47,6 +48,7 @@ function App() {
     clear: clearHistory,
   } = useHistoryLog(HISTORY_POLL_INTERVAL_MS);
 
+  const { theme, toggleTheme } = useTheme();
   const [activeView, setActiveView] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [bulkUpdating, setBulkUpdating] = useState(false);
@@ -79,7 +81,7 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col">
+    <div className={`min-h-screen font-mono flex flex-col transition-colors ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'}`}>
       <Header
         onRefresh={refreshContainers}
         onOpenSettings={() => setSettingsOpen(true)}
@@ -88,11 +90,13 @@ function App() {
         nextCheckLabel={scheduleError ? 'Error' : formatDateLabel(schedule.next_check_time)}
         scheduleEnabled={!!settings?.auto_update_enabled}
         notificationsEnabled={!!settings?.notifications_enabled}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
+          <div className={`inline-flex rounded-lg border p-1 shadow-sm ${theme === 'dark' ? 'border-slate-800 bg-slate-900' : 'border-slate-200 bg-white'}`}>
             {viewTabs.map((tab) => {
               const active = activeView === tab.id;
               return (
@@ -100,7 +104,11 @@ function App() {
                   key={tab.id}
                   onClick={() => setActiveView(tab.id)}
                   className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
-                    active ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50'
+                    active
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : theme === 'dark'
+                        ? 'text-slate-300 hover:bg-slate-800'
+                        : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
                   {tab.label}
@@ -132,11 +140,11 @@ function App() {
               <LoadingSpinner />
             ) : containers.length ? (
               <>
-                <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+                <div className={`border rounded-lg p-4 mb-6 shadow-sm ${theme === 'dark' ? 'border-slate-800 bg-slate-900/90' : 'border-slate-200 bg-white'}`}>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                      <h2 className="text-lg font-semibold text-gray-900">Manual update</h2>
-                      <p className="text-sm text-gray-600">Checks all containers and updates any that allow updates.</p>
+                      <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-slate-100' : 'text-slate-900'}`}>Manual update</h2>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Checks all containers and updates any that allow updates.</p>
                     </div>
                     <button
                       onClick={handleUpdateAll}
@@ -149,21 +157,41 @@ function App() {
 
                   {bulkResult && !bulkResult.error ? (
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                        theme === 'dark'
+                          ? 'bg-emerald-500/20 text-emerald-200 border-emerald-700/60'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}>
                         Updated: {bulkResult.summary?.updated ?? 0}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                        theme === 'dark'
+                          ? 'bg-blue-500/20 text-blue-200 border-blue-700/60'
+                          : 'bg-blue-50 text-blue-700 border-blue-200'
+                      }`}>
                         Up to date: {bulkResult.summary?.up_to_date ?? 0}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                        theme === 'dark'
+                          ? 'bg-slate-700 text-slate-200 border-slate-600'
+                          : 'bg-slate-100 text-slate-700 border-slate-200'
+                      }`}>
                         Skipped: {bulkResult.summary?.skipped ?? 0}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                        theme === 'dark'
+                          ? 'bg-red-500/20 text-red-200 border-red-700/60'
+                          : 'bg-red-50 text-red-700 border-red-200'
+                      }`}>
                         Errors: {bulkResult.summary?.errors ?? 0}
                       </span>
                     </div>
                   ) : bulkResult?.error ? (
-                    <div className="mt-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md p-3">
+                    <div className={`mt-4 text-sm rounded-md p-3 border ${
+                      theme === 'dark'
+                        ? 'text-red-200 bg-red-900/40 border-red-800'
+                        : 'text-red-700 bg-red-50 border-red-200'
+                    }`}>
                       {bulkResult.error}
                     </div>
                   ) : null}
@@ -191,6 +219,7 @@ function App() {
             error={historyError}
             onRefresh={refreshHistory}
             onClear={clearHistory}
+            theme={theme}
           />
         )}
       </main>
