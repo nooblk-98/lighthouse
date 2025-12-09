@@ -10,12 +10,12 @@ import ErrorBanner from '../feedback/ErrorBanner';
 import LoadingSpinner from '../feedback/LoadingSpinner';
 
 const statusStyles = {
-  updated: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-100 dark:border-emerald-800',
-  success: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-100 dark:border-emerald-800',
-  up_to_date: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-100 dark:border-blue-800',
-  skipped: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800',
-  error: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-100 dark:border-red-800',
-  update_available: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-100 dark:border-blue-800',
+  updated: { accent: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-200', border: 'border-emerald-100 dark:border-emerald-900/60' },
+  success: { accent: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-200', border: 'border-emerald-100 dark:border-emerald-900/60' },
+  up_to_date: { accent: 'bg-blue-500', text: 'text-blue-700 dark:text-blue-200', border: 'border-blue-100 dark:border-blue-900/60' },
+  skipped: { accent: 'bg-amber-500', text: 'text-amber-700 dark:text-amber-200', border: 'border-amber-100 dark:border-amber-900/60' },
+  error: { accent: 'bg-red-500', text: 'text-red-700 dark:text-red-200', border: 'border-red-100 dark:border-red-900/60' },
+  update_available: { accent: 'bg-blue-500', text: 'text-blue-700 dark:text-blue-200', border: 'border-blue-100 dark:border-blue-900/60' },
 };
 
 const formatTimestamp = (value) => {
@@ -23,17 +23,6 @@ const formatTimestamp = (value) => {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
   return parsed.toLocaleString();
-};
-
-const StatusBadge = ({ status }) => {
-  const key = (status || '').toLowerCase();
-  const classes = statusStyles[key] || 'bg-slate-50 text-slate-700 border-slate-200';
-  const label = (status || 'unknown').replace(/_/g, ' ');
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold capitalize ${classes}`}>
-      {label}
-    </span>
-  );
 };
 
 const MetaTag = ({ icon: Icon, label }) => (
@@ -48,39 +37,35 @@ const HistoryItem = ({ entry }) => {
   if (entry.details?.image) details.push(`Image: ${entry.details.image}`);
   if (entry.details?.latest_id) details.push(`Latest: ${entry.details.latest_id}`);
   if (entry.details?.new_id) details.push(`New ID: ${entry.details.new_id}`);
+  const key = (entry.status || '').toLowerCase();
+  const tone = statusStyles[key] || { accent: 'bg-slate-400', text: 'text-slate-700 dark:text-slate-200', border: 'border-slate-200 dark:border-slate-800' };
+  const statusLabel = (entry.status || 'unknown').replace(/_/g, ' ');
 
   return (
-    <div className="grid grid-cols-12 gap-4 items-start p-4 border-b border-slate-200 last:border-b-0 dark:border-slate-800">
-      <div className="col-span-12 md:col-span-3 flex items-start gap-3">
-        <span className="text-blue-500 dark:text-indigo-300">
-          <Activity size={18} />
-        </span>
-        <div className="space-y-1">
-          <StatusBadge status={entry.status} />
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{entry.container || 'System'}</p>
-          <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <MetaTag icon={Activity} label={entry.action || 'update'} />
-            {entry.trigger ? <MetaTag icon={RefreshCw} label={`${entry.trigger} trigger`} /> : null}
+    <div className={`relative overflow-hidden rounded-lg border bg-white shadow-sm dark:bg-slate-900 ${tone.border}`}>
+      <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-full ${tone.accent}`} aria-hidden />
+      <div className="flex flex-col gap-3 px-4 py-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <p className={`text-xs font-semibold uppercase tracking-wide ${tone.text}`}>{statusLabel}</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{entry.container || 'System'}</p>
+            <p className="text-xs text-slate-600 dark:text-slate-300">{entry.message || 'No additional details.'}</p>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+            <Clock3 size={14} className="text-slate-400 dark:text-slate-500" />
+            <span className="font-medium">{formatTimestamp(entry.timestamp)}</span>
           </div>
         </div>
-      </div>
 
-      <div className="col-span-12 md:col-span-5 text-sm text-slate-800 dark:text-slate-200 space-y-1 break-words">
-        <p>{entry.message || 'No additional details.'}</p>
-        {details.length ? (
-          <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-300">
-            {details.map((item) => (
-              <span key={item} className="inline-flex items-center rounded-full bg-white px-2 py-1 ring-1 ring-gray-200 dark:bg-slate-800 dark:ring-slate-700">
-                {item}
-              </span>
-            ))}
-          </div>
-        ) : null}
-      </div>
-
-      <div className="col-span-12 md:col-span-4 text-left md:text-right text-xs text-slate-500 dark:text-slate-400 flex md:block items-center gap-2">
-        <Clock3 size={14} className="text-slate-400 dark:text-slate-500" />
-        <span className="font-medium text-slate-700 dark:text-slate-200">{formatTimestamp(entry.timestamp)}</span>
+        <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <MetaTag icon={Activity} label={entry.action || 'update'} />
+          {entry.trigger ? <MetaTag icon={RefreshCw} label={`${entry.trigger} trigger`} /> : null}
+          {details.map((item) => (
+            <span key={item} className="inline-flex items-center rounded-md bg-slate-50 px-2 py-1 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
+              {item}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -102,7 +87,7 @@ const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage 
         {emptyMessage}
       </div>
     ) : (
-      <div className="text-xs">
+      <div className="text-xs space-y-3 p-3">
         {entries.map((entry) => (
           <HistoryItem key={entry.id} entry={entry} />
         ))}
