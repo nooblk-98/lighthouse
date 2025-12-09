@@ -12,7 +12,7 @@ __pycache__/
 client/.vite
 client/dist
 client/node_modules
+client/vite.config.js
 server/__pycache__/
 server/.venv
 server/*.pyc
-./client/vite.config.js
