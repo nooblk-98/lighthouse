@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Activity,
   Clock3,
@@ -10,12 +10,48 @@ import ErrorBanner from '../feedback/ErrorBanner';
 import LoadingSpinner from '../feedback/LoadingSpinner';
 
 const statusStyles = {
-  updated: { accent: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-200', border: 'border-emerald-100 dark:border-emerald-900/60' },
-  success: { accent: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-200', border: 'border-emerald-100 dark:border-emerald-900/60' },
-  up_to_date: { accent: 'bg-blue-500', text: 'text-blue-700 dark:text-blue-200', border: 'border-blue-100 dark:border-blue-900/60' },
-  skipped: { accent: 'bg-amber-500', text: 'text-amber-700 dark:text-amber-200', border: 'border-amber-100 dark:border-amber-900/60' },
-  error: { accent: 'bg-red-500', text: 'text-red-700 dark:text-red-200', border: 'border-red-100 dark:border-red-900/60' },
-  update_available: { accent: 'bg-blue-500', text: 'text-blue-700 dark:text-blue-200', border: 'border-blue-100 dark:border-blue-900/60' },
+  updated: {
+    accent: 'bg-emerald-500',
+    text: 'text-emerald-200',
+    border: 'border-emerald-500/40',
+    card: 'bg-emerald-500/5',
+    badge: 'bg-emerald-500/15 text-emerald-100 border border-emerald-500/30',
+  },
+  success: {
+    accent: 'bg-emerald-500',
+    text: 'text-emerald-200',
+    border: 'border-emerald-500/40',
+    card: 'bg-emerald-500/5',
+    badge: 'bg-emerald-500/15 text-emerald-100 border border-emerald-500/30',
+  },
+  up_to_date: {
+    accent: 'bg-blue-500',
+    text: 'text-blue-200',
+    border: 'border-blue-500/40',
+    card: 'bg-blue-500/5',
+    badge: 'bg-blue-500/15 text-blue-100 border border-blue-500/30',
+  },
+  skipped: {
+    accent: 'bg-amber-500',
+    text: 'text-amber-200',
+    border: 'border-amber-500/40',
+    card: 'bg-amber-500/5',
+    badge: 'bg-amber-500/15 text-amber-100 border border-amber-500/30',
+  },
+  error: {
+    accent: 'bg-red-500',
+    text: 'text-red-200',
+    border: 'border-red-500/40',
+    card: 'bg-red-500/5',
+    badge: 'bg-red-500/15 text-red-100 border border-red-500/30',
+  },
+  update_available: {
+    accent: 'bg-blue-500',
+    text: 'text-blue-200',
+    border: 'border-blue-500/40',
+    card: 'bg-blue-500/5',
+    badge: 'bg-blue-500/15 text-blue-100 border border-blue-500/30',
+  },
 };
 
 const formatTimestamp = (value) => {
@@ -26,54 +62,83 @@ const formatTimestamp = (value) => {
 };
 
 const MetaTag = ({ icon: Icon, label }) => (
-  <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-slate-800 dark:ring-slate-700 dark:text-slate-300">
+  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-slate-200 dark:bg-slate-800/70 dark:ring-slate-700 dark:text-slate-200">
     <Icon size={14} className="text-gray-500 dark:text-slate-300" />
     {label}
   </span>
 );
 
 const HistoryItem = ({ entry }) => {
+  const [expanded, setExpanded] = useState(false);
   const details = [];
   if (entry.details?.image) details.push(`Image: ${entry.details.image}`);
   if (entry.details?.latest_id) details.push(`Latest: ${entry.details.latest_id}`);
   if (entry.details?.new_id) details.push(`New ID: ${entry.details.new_id}`);
   const key = (entry.status || '').toLowerCase();
-  const tone = statusStyles[key] || { accent: 'bg-slate-400', text: 'text-slate-700 dark:text-slate-200', border: 'border-slate-200 dark:border-slate-800' };
+  const tone = statusStyles[key] || {
+    accent: 'bg-slate-500',
+    text: 'text-slate-200',
+    border: 'border-slate-800',
+    card: 'bg-slate-900/50',
+    badge: 'bg-slate-700/50 text-slate-100 border border-slate-700',
+  };
   const statusLabel = (entry.status || 'unknown').replace(/_/g, ' ');
+  const hasBody = Boolean(entry.message || details.length);
 
   return (
-    <div className={`relative overflow-hidden rounded-lg border bg-white shadow-sm dark:bg-slate-900 ${tone.border}`}>
+    <div className={`relative overflow-hidden rounded-xl border shadow-sm ${tone.border} ${tone.card || 'bg-slate-900/50'} dark:text-slate-100`}>
       <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-full ${tone.accent}`} aria-hidden />
-      <div className="flex flex-col gap-3 px-4 py-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <p className={`text-xs font-semibold uppercase tracking-wide ${tone.text}`}>{statusLabel}</p>
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{entry.container || 'System'}</p>
-            <p className="text-xs text-slate-600 dark:text-slate-300">{entry.message || 'No additional details.'}</p>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
-            <Clock3 size={14} className="text-slate-400 dark:text-slate-500" />
-            <span className="font-medium">{formatTimestamp(entry.timestamp)}</span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <MetaTag icon={Activity} label={entry.action || 'update'} />
-          {entry.trigger ? <MetaTag icon={RefreshCw} label={`${entry.trigger} trigger`} /> : null}
-          {details.map((item) => (
-            <span key={item} className="inline-flex items-center rounded-md bg-slate-50 px-2 py-1 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
-              {item}
+      <div className="flex flex-col gap-2 px-4 py-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <span className={`inline-flex items-center gap-2 rounded-sm px-2 py-1 text-[11px] font-semibold uppercase tracking-wide ${tone.badge}`}>
+              <span className={`inline-block h-2 w-2 rounded-full ${tone.accent}`} />
+              {statusLabel}
             </span>
-          ))}
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{entry.container || 'System'}</p>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+            <div className="flex items-center gap-1">
+              <Clock3 size={14} className="text-slate-400 dark:text-slate-500" />
+              <span className="font-medium">{formatTimestamp(entry.timestamp)}</span>
+            </div>
+            {hasBody ? (
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                className="text-[11px] font-semibold px-2 py-1 rounded-md border border-slate-700/50 text-slate-200 bg-slate-800/60 hover:bg-slate-700/60 transition-colors"
+              >
+                {expanded ? 'Collapse' : 'Expand'}
+              </button>
+            ) : null}
+          </div>
         </div>
+        {expanded && hasBody ? (
+          <>
+            {entry.message ? (
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                {entry.message}
+              </p>
+            ) : null}
+            {details.length ? (
+              <div className="flex flex-wrap gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                {details.map((item) => (
+                  <span key={item} className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 ring-1 ring-slate-200 dark:bg-slate-900/60 dark:ring-slate-800">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </>
+        ) : null}
       </div>
     </div>
   );
 };
 
 const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage }) => (
-  <section className="rounded-lg border border-slate-200 bg-white shadow-sm flex flex-col dark:border-slate-800 dark:bg-slate-900/70">
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-800">
+  <section className="rounded-xl border border-slate-200 bg-white shadow-sm flex flex-col dark:border-slate-800 dark:bg-slate-950/40">
+    <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 dark:border-slate-800/80">
       <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
         <Icon size={18} />
       </span>
@@ -83,11 +148,11 @@ const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage 
       </div>
     </div>
     {entries.length === 0 ? (
-      <div className="w-full rounded-lg border border-dashed border-transparent bg-gray-50 px-4 py-10 text-sm text-gray-600 text-center dark:bg-slate-800/60 dark:text-slate-300">
+      <div className="w-full rounded-lg border border-dashed border-transparent bg-gray-50 px-5 py-10 text-sm text-gray-600 text-center dark:bg-slate-900/40 dark:text-slate-300">
         {emptyMessage}
       </div>
     ) : (
-      <div className="text-xs space-y-3 p-3">
+      <div className="text-xs space-y-3 p-4">
         {entries.map((entry) => (
           <HistoryItem key={entry.id} entry={entry} />
         ))}
