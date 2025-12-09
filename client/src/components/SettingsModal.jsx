@@ -239,8 +239,8 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 dark:bg-slate-900 rounded-lg shadow-2xl w-full max-w-5xl grid grid-cols-1 md:grid-cols-4 overflow-hidden dark:border dark:border-slate-800">
-        <div className="bg-gray-50 border-r border-gray-200 p-4 md:p-6 dark:bg-slate-950 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl w-full max-w-5xl grid grid-cols-1 md:grid-cols-4 overflow-hidden dark:border dark:border-slate-700">
+        <div className="bg-gray-50 border-r border-gray-200 p-4 md:p-6 dark:bg-slate-800 dark:border-slate-700">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Settings</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-slate-200 md:hidden dark:text-slate-300 dark:hover:text-slate-100">
@@ -303,7 +303,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                     value={formData.check_interval_minutes}
                     onChange={handleChange}
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                   />
                 </div>
               </div>
@@ -352,7 +352,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                     name="smtp_host"
                     value={formData.smtp_host}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                     placeholder="smtp.example.com"
                   />
                 </div>
@@ -363,7 +363,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                     name="smtp_port"
                     value={formData.smtp_port}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                   />
                 </div>
               </div>
@@ -376,7 +376,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                     name="smtp_username"
                     value={formData.smtp_username}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                   />
                 </div>
                 <div>
@@ -386,7 +386,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                     name="smtp_password"
                     value={formData.smtp_password}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                   />
                 </div>
               </div>
@@ -399,7 +399,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                     name="smtp_from"
                     value={formData.smtp_from}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                     placeholder="noreply@example.com"
                   />
                 </div>
@@ -410,7 +410,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                     name="smtp_to"
                     value={formData.smtp_to}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                     placeholder="ops@example.com"
                   />
                 </div>
@@ -445,7 +445,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       name="dockerhub_username"
                       value={formData.dockerhub_username}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                       placeholder="dockerhub user"
                     />
                   </div>
@@ -456,7 +456,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       name="dockerhub_token"
                       value={formData.dockerhub_token}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                       placeholder="access token / PAT"
                     />
                   </div>
@@ -485,7 +485,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       name="ghcr_username"
                       value={formData.ghcr_username}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                       placeholder="github user"
                     />
                   </div>
@@ -496,7 +496,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       name="ghcr_token"
                       value={formData.ghcr_token}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                       placeholder="ghcr PAT with read:packages"
                     />
                   </div>
@@ -528,8 +528,8 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 description="Encrypted backups keep all settings (including credentials) safe to move between installs."
               />
 
-              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+              <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-slate-800 dark:border-slate-700">
+                <div className="text-sm font-semibold text-gray-800 dark:text-slate-100 flex items-center gap-2">
                   <Download size={16} />
                   Export encrypted backup
                 </div>
@@ -543,7 +543,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                         setBackupPassword(e.target.value);
                         setImportPassword(e.target.value);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                       placeholder="Required for export and import"
                     />
                   </div>
@@ -553,7 +553,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       <select
                         value={backupFormat}
                         onChange={(e) => setBackupFormat(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-900"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                       >
                         <option value="json">JSON</option>
                         <option value="yaml">YAML</option>
@@ -579,8 +579,8 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 </div>
               </div>
 
-              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                <div className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+              <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-slate-800 dark:border-slate-700">
+                <div className="text-sm font-semibold text-gray-800 dark:text-slate-100 flex items-center gap-2">
                   <Upload size={16} />
                   Import backup
                 </div>
@@ -591,7 +591,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       type="password"
                       value={importPassword}
                       onChange={(e) => setImportPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
                       placeholder="Password used when exporting"
                     />
                   </div>
