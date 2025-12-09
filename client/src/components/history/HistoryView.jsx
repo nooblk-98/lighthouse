@@ -36,8 +36,8 @@ const StatusBadge = ({ status }) => {
 };
 
 const MetaTag = ({ icon: Icon, label }) => (
-  <span className="inline-flex items-center gap-1 rounded-md bg-white/60 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-200">
-    <Icon size={14} className="text-gray-500" />
+  <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-slate-800 dark:ring-slate-700 dark:text-slate-300">
+    <Icon size={14} className="text-gray-500 dark:text-slate-300" />
     {label}
   </span>
 );
@@ -49,9 +49,9 @@ const HistoryItem = ({ entry }) => {
   if (entry.details?.new_id) details.push(`New ID: ${entry.details.new_id}`);
 
   return (
-    <div className="rounded-lg border border-gray-200/70 bg-white/70 px-4 py-4 shadow-sm dark:border-slate-800/70 dark:bg-slate-900/70">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 space-y-3">
+    <div className="px-2">
+      <div className="flex items-start justify-between gap-3 py-4 border-b border-gray-200 last:border-b-0 dark:border-slate-800">
+        <div className="flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold text-gray-900 dark:text-slate-100 tracking-tight">{entry.container || 'System'}</span>
             <StatusBadge status={entry.status} />
@@ -59,7 +59,7 @@ const HistoryItem = ({ entry }) => {
           <div className="text-sm leading-relaxed text-gray-700 dark:text-slate-200">
             {entry.message || 'No additional details.'}
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-slate-400">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600 dark:text-slate-400">
             <MetaTag icon={Activity} label={entry.action || 'update'} />
             {entry.trigger ? <MetaTag icon={RefreshCw} label={`${entry.trigger} trigger`} /> : null}
             <span className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-600 dark:text-slate-300">
@@ -83,7 +83,7 @@ const HistoryItem = ({ entry }) => {
 };
 
 const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage }) => (
-  <section className="rounded-2xl border border-gray-200/70 bg-white/50 p-5 shadow-sm flex flex-col gap-5 dark:border-slate-800/70 dark:bg-slate-900/60">
+  <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col gap-3 dark:border-slate-800 dark:bg-slate-900/70">
     <div className="flex items-center gap-3">
       <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200 shadow-sm">
         <Icon size={18} />
@@ -94,11 +94,11 @@ const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage 
       </div>
     </div>
     {entries.length === 0 ? (
-      <div className="w-full rounded-lg border border-dashed border-gray-200 bg-gray-50/60 px-4 py-10 text-sm text-gray-600 text-center dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+      <div className="w-full rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-sm text-gray-600 text-center dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
         {emptyMessage}
       </div>
     ) : (
-      <div className="space-y-4">
+      <div className="divide-y divide-gray-200 dark:divide-slate-800">
         {entries.map((entry) => (
           <HistoryItem key={entry.id} entry={entry} />
         ))}
