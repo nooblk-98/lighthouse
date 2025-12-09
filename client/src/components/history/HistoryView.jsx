@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   Activity,
-  AlertTriangle,
   Clock3,
   Eraser,
   History as HistoryIcon,
@@ -109,11 +108,6 @@ const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage 
 );
 
 const HistoryView = ({ entries = [], loading, error, onRefresh, onClear }) => {
-  const errorEntries = useMemo(
-    () => entries.filter((entry) => (entry.status || '').toLowerCase() === 'error'),
-    [entries],
-  );
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -151,22 +145,13 @@ const HistoryView = ({ entries = [], loading, error, onRefresh, onClear }) => {
           <LoadingSpinner />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <HistorySection
-            title="Update history"
-            description="Manual and automatic update attempts."
-            icon={Activity}
-            entries={entries}
-            emptyMessage="No update activity recorded yet."
-          />
-          <HistorySection
-            title="Error history"
-            description="Failures captured during checks or updates."
-            icon={AlertTriangle}
-            entries={errorEntries}
-            emptyMessage="No errors have been recorded."
-          />
-        </div>
+        <HistorySection
+          title="Update history"
+          description="Manual and automatic update attempts (including errors)."
+          icon={Activity}
+          entries={entries}
+          emptyMessage="No update activity recorded yet."
+        />
       )}
     </div>
   );
