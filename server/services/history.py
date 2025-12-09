@@ -66,3 +66,7 @@ class HistoryService:
         if limit:
             records = records[-limit:]
         return list(reversed(records))
+
+    def clear(self):
+        self._history = []
+        self._save()

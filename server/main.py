@@ -193,6 +193,12 @@ def get_history(action: str = None, status: str = None, limit: int = 100):
     return history_service.get_history(action=action, status=status, limit=limit)
 
 
+@app.delete("/api/history")
+def clear_history():
+    history_service.clear()
+    return {"cleared": True}
+
+
 @app.post("/api/settings")
 def update_settings(new_settings: dict):
     updated = settings_manager.update(new_settings)

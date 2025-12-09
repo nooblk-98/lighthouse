@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getHistory } from '../api/history';
+import { clearHistory, getHistory } from '../api/history';
 
 const DEFAULT_ERROR = 'Failed to load history. Make sure the backend is reachable.';
 
@@ -20,6 +20,19 @@ export function useHistoryLog(pollIntervalMs = 60000) {
     }
   }, []);
 
+  const clear = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await clearHistory();
+      setEntries([]);
+    } catch (err) {
+      setError(err.message || DEFAULT_ERROR);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     refresh();
     const interval = setInterval(refresh, pollIntervalMs);
@@ -31,5 +44,6 @@ export function useHistoryLog(pollIntervalMs = 60000) {
     loading,
     error,
     refresh,
+    clear,
   };
 }

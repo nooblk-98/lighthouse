@@ -10,3 +10,7 @@ export async function getHistory(params = {}) {
   const qs = query.toString() ? `?${query.toString()}` : '';
   return request(`/history${qs}`);
 }
+
+export async function clearHistory() {
+  return request('/history', { method: 'DELETE' });
+}

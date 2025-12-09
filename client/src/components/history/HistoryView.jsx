@@ -3,6 +3,7 @@ import {
   Activity,
   AlertTriangle,
   Clock3,
+  Eraser,
   History as HistoryIcon,
   RefreshCw,
 } from 'lucide-react';
@@ -107,7 +108,7 @@ const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage 
   </section>
 );
 
-const HistoryView = ({ entries = [], loading, error, onRefresh }) => {
+const HistoryView = ({ entries = [], loading, error, onRefresh, onClear }) => {
   const errorEntries = useMemo(
     () => entries.filter((entry) => (entry.status || '').toLowerCase() === 'error'),
     [entries],
@@ -123,14 +124,24 @@ const HistoryView = ({ entries = [], loading, error, onRefresh }) => {
           </div>
           <p className="text-sm text-gray-600">Recent update attempts, auto-runs, and errors.</p>
         </div>
-        <button
-          onClick={onRefresh}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-50"
-        >
-          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-          Refresh history
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onRefresh}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-50"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Refresh history
+          </button>
+          <button
+            onClick={onClear}
+            disabled={loading || entries.length === 0}
+            className="inline-flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-100 disabled:opacity-50"
+          >
+            <Eraser size={16} />
+            Clear history
+          </button>
+        </div>
       </div>
 
       {error ? <ErrorBanner message={error} /> : null}

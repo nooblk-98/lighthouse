@@ -44,6 +44,7 @@ function App() {
     loading: historyLoading,
     error: historyError,
     refresh: refreshHistory,
+    clear: clearHistory,
   } = useHistoryLog(HISTORY_POLL_INTERVAL_MS);
 
   const [activeView, setActiveView] = useState('dashboard');
@@ -189,6 +190,7 @@ function App() {
             loading={historyLoading}
             error={historyError}
             onRefresh={refreshHistory}
+            onClear={clearHistory}
           />
         )}
       </main>
