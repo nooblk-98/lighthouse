@@ -10,6 +10,20 @@ class NotificationService:
     def __init__(self, settings_manager):
         self.settings_manager = settings_manager
 
+    def _send_email(self, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_from, smtp_to, use_tls, msg):
+        if use_tls:
+            context = ssl.create_default_context()
+            with smtplib.SMTP(smtp_host, smtp_port) as server:
+                server.starttls(context=context)
+                if smtp_user and smtp_pass:
+                    server.login(smtp_user, smtp_pass)
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(smtp_host, smtp_port) as server:
+                if smtp_user and smtp_pass:
+                    server.login(smtp_user, smtp_pass)
+                server.send_message(msg)
+
     def send_update_notification(self, container_name: str, update_result: dict):
         settings = self.settings_manager.get_all()
         if not settings.get("notifications_enabled"):
@@ -80,18 +94,54 @@ class NotificationService:
             msg.set_content(body)
             msg.add_alternative(html_body, subtype="html")
 
-            if use_tls:
-                context = ssl.create_default_context()
-                with smtplib.SMTP(smtp_host, smtp_port) as server:
-                    server.starttls(context=context)
-                    if smtp_user and smtp_pass:
-                        server.login(smtp_user, smtp_pass)
-                    server.send_message(msg)
-            else:
-                with smtplib.SMTP(smtp_host, smtp_port) as server:
-                    if smtp_user and smtp_pass:
-                        server.login(smtp_user, smtp_pass)
-                    server.send_message(msg)
+            self._send_email(smtp_host, smtp_port, smtp_user, smtp_pass, smtp_from, smtp_to, use_tls, msg)
             logger.info(f"Notification sent for {container_name}")
         except Exception as e:
             logger.error(f"Failed to send notification: {e}")
+
+    def send_test_notification(self, message: str = "This is a test email from Lighthouse."):
+        settings = self.settings_manager.get_all()
+        if not settings.get("notifications_enabled"):
+            raise ValueError("Notifications are disabled. Enable them to send a test email.")
+
+        required = [
+            settings.get("smtp_host"),
+            settings.get("smtp_port"),
+            settings.get("smtp_from"),
+            settings.get("smtp_to"),
+        ]
+        if any(v in (None, "") for v in required):
+            raise ValueError("SMTP settings are incomplete. Please set host, port, from, and to.")
+
+        smtp_host = settings.get("smtp_host")
+        smtp_port = int(settings.get("smtp_port") or 0)
+        smtp_user = settings.get("smtp_username") or None
+        smtp_pass = settings.get("smtp_password") or None
+        smtp_from = settings.get("smtp_from")
+        smtp_to = settings.get("smtp_to")
+        use_tls = bool(settings.get("smtp_use_tls", True))
+
+        subject = "Lighthouse test email"
+        body = f"Test email successful.\n\n{message}"
+        html_body = f"""
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; background:#f8fafc; padding:24px; color:#0f172a;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px;">
+            <tr>
+              <td style="padding:24px;">
+                <h2 style="margin:0 0 12px; font-size:20px; color:#0f172a;">Lighthouse SMTP test</h2>
+                <p style="margin:0; font-size:14px; color:#0f172a;">{message}</p>
+              </td>
+            </tr>
+          </table>
+        </div>
+        """
+
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = smtp_from
+        msg["To"] = smtp_to
+        msg.set_content(body)
+        msg.add_alternative(html_body, subtype="html")
+
+        self._send_email(smtp_host, smtp_port, smtp_user, smtp_pass, smtp_from, smtp_to, use_tls, msg)
+        return {"sent": True}
