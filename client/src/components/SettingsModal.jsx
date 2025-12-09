@@ -65,7 +65,6 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     ghcr: { state: 'idle', message: '' },
   });
   const [smtpStatus, setSmtpStatus] = useState({ state: 'idle', message: '' });
-  const [smtpTestStatus, setSmtpTestStatus] = useState({ state: 'idle', message: '' });
   const [backupPassword, setBackupPassword] = useState('');
   const [backupFormat, setBackupFormat] = useState('json');
   const [backupStatus, setBackupStatus] = useState(null);
@@ -225,20 +224,11 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
       if (!res?.valid) {
         throw new Error(res?.message || 'Validation failed');
       }
-      setSmtpStatus({ state: 'success', message: res.message || 'SMTP validated.' });
+      setSmtpStatus({ state: 'validating', message: 'Validated. Sending test email...' });
+      await sendTestEmail('SMTP validated, sending test email.');
+      setSmtpStatus({ state: 'success', message: 'SMTP validated and test email sent.' });
     } catch (err) {
       setSmtpStatus({ state: 'error', message: err.message || 'SMTP validation failed.' });
-    }
-  };
-
-  const handleSmtpTest = async () => {
-    setActiveSection('notifications');
-    setSmtpTestStatus({ state: 'validating', message: 'Sending test email...' });
-    try {
-      await sendTestEmail('Test email from Lighthouse settings.');
-      setSmtpTestStatus({ state: 'success', message: 'Test email sent.' });
-    } catch (err) {
-      setSmtpTestStatus({ state: 'error', message: err.message || 'Failed to send test email.' });
     }
   };
 
@@ -344,27 +334,15 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 helper="Send an email after each container update."
               />
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-              <StatusChip state={smtpStatus.state} message={smtpStatus.message} />
-              <button
-                type="button"
-                onClick={handleSmtpValidate}
-                className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                disabled={smtpStatus.state === 'validating' || loading}
-              >
-                {smtpStatus.state === 'validating' ? 'Validating...' : 'Validate SMTP'}
-              </button>
-            </div>
-
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
-                <StatusChip state={smtpTestStatus.state} message={smtpTestStatus.message} />
+                <StatusChip state={smtpStatus.state} message={smtpStatus.message} />
                 <button
                   type="button"
-                  onClick={handleSmtpTest}
-                  className="px-3 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
-                  disabled={smtpTestStatus.state === 'validating' || loading}
+                  onClick={handleSmtpValidate}
+                  className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                  disabled={smtpStatus.state === 'validating' || loading}
                 >
-                  {smtpTestStatus.state === 'validating' ? 'Sending...' : 'Send test email'}
+                  {smtpStatus.state === 'validating' ? 'Working...' : 'Validate SMTP & send test'}
                 </button>
               </div>
 
