@@ -367,6 +367,10 @@ def update_all_containers():
                     "status": "error",
                     "message": check_result.get("error"),
                 })
+                try:
+                    notifier.send_update_notification(name, {**check_result, "success": False, "message": check_result.get("error")})
+                except Exception:
+                    pass
                 status_cache.update(name, check_result)
                 history_service.log_event(
                     action="bulk_update",
