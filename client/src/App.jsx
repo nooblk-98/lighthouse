@@ -12,6 +12,7 @@ import HistoryView from './components/history/HistoryView';
 import ScheduleSummary from './components/layout/ScheduleSummary';
 import Footer from './components/layout/Footer';
 import { useHistoryLog } from './hooks/useHistoryLog';
+import { useTheme } from './hooks/useTheme';
 import { version as appVersion } from '../package.json';
 
 const POLL_INTERVAL_MS = 30000;
@@ -47,6 +48,7 @@ function App() {
     clear: clearHistory,
   } = useHistoryLog(HISTORY_POLL_INTERVAL_MS);
 
+  const { theme, toggleTheme } = useTheme();
   const [activeView, setActiveView] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [bulkUpdating, setBulkUpdating] = useState(false);
@@ -79,7 +81,7 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col">
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col dark:bg-slate-950 dark:text-slate-50 transition-colors">
       <Header
         onRefresh={refreshContainers}
         onOpenSettings={() => setSettingsOpen(true)}
@@ -88,6 +90,8 @@ function App() {
         nextCheckLabel={scheduleError ? 'Error' : formatDateLabel(schedule.next_check_time)}
         scheduleEnabled={!!settings?.auto_update_enabled}
         notificationsEnabled={!!settings?.notifications_enabled}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -132,11 +136,11 @@ function App() {
               <LoadingSpinner />
             ) : containers.length ? (
               <>
-                <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+                <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm dark:bg-slate-900 dark:border-slate-800">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                      <h2 className="text-lg font-semibold text-gray-900">Manual update</h2>
-                      <p className="text-sm text-gray-600">Checks all containers and updates any that allow updates.</p>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Manual update</h2>
+                      <p className="text-sm text-gray-600 dark:text-slate-300">Checks all containers and updates any that allow updates.</p>
                     </div>
                     <button
                       onClick={handleUpdateAll}
@@ -149,21 +153,21 @@ function App() {
 
                   {bulkResult && !bulkResult.error ? (
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800">
                         Updated: {bulkResult.summary?.updated ?? 0}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/40 dark:text-blue-100 dark:border-blue-800">
                         Up to date: {bulkResult.summary?.up_to_date ?? 0}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
                         Skipped: {bulkResult.summary?.skipped ?? 0}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200 dark:bg-red-900/40 dark:text-red-100 dark:border-red-800">
                         Errors: {bulkResult.summary?.errors ?? 0}
                       </span>
                     </div>
                   ) : bulkResult?.error ? (
-                    <div className="mt-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md p-3">
+                    <div className="mt-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md p-3 dark:bg-red-900/40 dark:text-red-100 dark:border-red-800">
                       {bulkResult.error}
                     </div>
                   ) : null}
