@@ -641,11 +641,11 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
           ) : null}
 
           {activeSection !== 'backup' && activeSection !== 'registries' ? (
-            <div className="pt-4 flex justify-end gap-3 border-t border-gray-200">
+            <div className="pt-4 flex justify-end gap-3 border-t border-gray-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-gray-100 rounded-md hover:bg-gray-200"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border dark:border-slate-700"
               >
                 Cancel
               </button>

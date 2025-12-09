@@ -49,14 +49,14 @@ const HistoryItem = ({ entry }) => {
   if (entry.details?.new_id) details.push(`New ID: ${entry.details.new_id}`);
 
   return (
-    <div className="rounded-md border border-gray-200 bg-gray-50/80 px-3 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="rounded-lg border border-gray-200/70 bg-white/70 px-4 py-4 shadow-sm dark:border-slate-800/70 dark:bg-slate-900/70">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{entry.container || 'System'}</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-slate-100 tracking-tight">{entry.container || 'System'}</span>
             <StatusBadge status={entry.status} />
           </div>
-          <div className="text-sm text-gray-700 dark:text-slate-200">
+          <div className="text-sm leading-relaxed text-gray-700 dark:text-slate-200">
             {entry.message || 'No additional details.'}
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-slate-400">
@@ -83,9 +83,9 @@ const HistoryItem = ({ entry }) => {
 };
 
 const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage }) => (
-  <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm flex flex-col gap-4 dark:border-slate-800 dark:bg-slate-900">
+  <section className="rounded-2xl border border-gray-200/70 bg-white/50 p-5 shadow-sm flex flex-col gap-5 dark:border-slate-800/70 dark:bg-slate-900/60">
     <div className="flex items-center gap-3">
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-200">
+      <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200 shadow-sm">
         <Icon size={18} />
       </span>
       <div>
@@ -94,11 +94,11 @@ const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage 
       </div>
     </div>
     {entries.length === 0 ? (
-      <div className="w-full rounded-md border border-dashed border-gray-200 bg-gray-50/60 px-4 py-8 text-sm text-gray-600 text-center dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+      <div className="w-full rounded-lg border border-dashed border-gray-200 bg-gray-50/60 px-4 py-10 text-sm text-gray-600 text-center dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
         {emptyMessage}
       </div>
     ) : (
-      <div className="space-y-3">
+      <div className="space-y-4">
         {entries.map((entry) => (
           <HistoryItem key={entry.id} entry={entry} />
         ))}
@@ -113,8 +113,10 @@ const HistoryView = ({ entries = [], loading, error, onRefresh, onClear }) => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-gray-900 dark:text-slate-100">
-            <HistoryIcon size={20} className="text-indigo-600 dark:text-indigo-300" />
-            <h2 className="text-xl font-bold">History</h2>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
+              <HistoryIcon size={18} />
+            </span>
+            <h2 className="text-xl font-bold tracking-tight">History</h2>
           </div>
           <p className="text-sm text-gray-600 dark:text-slate-300">Recent update attempts, auto-runs, and errors.</p>
         </div>
