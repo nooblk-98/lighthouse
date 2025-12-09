@@ -88,11 +88,11 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
         </div>
       </div>
 
-      <div className="col-span-3 lg:col-span-2 text-xs text-slate-500 dark:text-slate-400 flex items-center">
+      <div className="col-span-3 lg:col-span-3 text-xs text-slate-500 dark:text-slate-400 flex items-center">
         {createdDisplay}
       </div>
 
-      <div className="col-span-3 lg:col-span-4 text-xs flex flex-wrap gap-2 items-center text-slate-600 dark:text-slate-300">
+      <div className="col-span-2 lg:col-span-2 text-xs flex flex-wrap gap-2 items-center text-slate-600 dark:text-slate-300">
         <span className={`font-semibold px-2 py-1 rounded-sm flex items-center gap-2 ${isRunning ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
           <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500' : 'bg-slate-500'}`} />
           {isRunning ? 'RUNNING' : container.state?.toUpperCase() || 'N/A'}
@@ -102,7 +102,7 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
         ) : null}
       </div>
 
-      <div className="col-span-2 lg:col-span-3 flex items-center justify-end gap-3 text-xs md:text-sm">
+      <div className="col-span-3 lg:col-span-3 flex items-center justify-end gap-3 text-xs md:text-sm">
         <label className="flex items-center cursor-pointer" htmlFor={`update-toggle-${container.id}`}>
           <input
             checked={!isExcluded}
