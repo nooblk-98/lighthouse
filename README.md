@@ -9,7 +9,8 @@
     <a href="https://hub.docker.com/r/lahiru98s/lighthouse-ui"><img src="https://img.shields.io/docker/pulls/lahiru98s/lighthouse-ui.svg" alt="Docker UI pulls" /></a>
     <a href="https://github.com/nooblk-98/lighthouse/releases"><img src="https://img.shields.io/github/v/release/nooblk-98/lighthouse?logo=github" alt="Latest release" /></a>
     <a href="https://github.com/nooblk-98/lighthouse/actions/workflows/docker-build-push.yml"><img src="https://github.com/nooblk-98/lighthouse/actions/workflows/docker-build-push.yml/badge.svg" alt="CI" /></a>
-    <a href="https://github.com/nooblk-98/lighthouse/blob/main/LICENSE"><img src="https://img.shields.io/github/license/nooblk-98/lighthouse.svg" alt="License" /></a>
+     <a href="https://creativecommons.org/licenses/by-nc/2.0/">
+    <img src="https://img.shields.io/badge/License-CC%20BY--NC%202.0-blue.svg" alt="License: CC BY-NC 2.0" />
   </div>
 </div>
 
@@ -127,22 +128,6 @@ docker-compose build
 docker-compose logs -f backend
 docker-compose logs -f frontend
 ```
-
-## License
-
-This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License** (CC BY-NC 4.0).
-
-You are free to:
-- ✅ Share, copy, and redistribute the material
-- ✅ Adapt, remix, transform, and build upon the material
-- ✅ Use for personal, educational, or non-commercial purposes
-
-Restrictions:
-- ❌ Commercial use is not permitted without permission
-- ℹ️ You must give appropriate credit and indicate if changes were made
-
-See the [LICENSE](LICENSE) file for full details or visit https://creativecommons.org/licenses/by-nc/4.0/
-
 ## TODO / Ideas
 - Create login page for UI
 - ~~Support custom registry credentials~~
