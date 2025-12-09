@@ -35,7 +35,7 @@ class UpdateService:
     def _ensure_registry_auth(self, image_name: str) -> Optional[str]:
         """
         Log in to Docker Hub or GHCR when credentials are configured.
-        Returns an error string if auth fails, otherwise None.
+        Returns an error string if auth fails, otherwise None. We log but still allow anonymous pull to continue.
         """
         provider, registry_url = self._detect_registry(image_name)
         if not provider or not registry_url:
@@ -56,8 +56,8 @@ class UpdateService:
             self._auth_cache = {cache_key: True}
             return None
         except Exception as e:
-            logger.error(f"Registry authentication failed for {registry_url}: {e}")
-            return f"Registry authentication failed for {registry_url}: {e}"
+            logger.warning(f"Registry authentication failed for {registry_url}: {e}. Proceeding without credentials.")
+            return f"Registry authentication failed for {registry_url}: {e}. Pulled anonymously."
 
     def check_for_update(self, container_id: str) -> dict:
         """
@@ -71,8 +71,6 @@ class UpdateService:
 
             # Ensure we are authenticated before pulling private images
             auth_error = self._ensure_registry_auth(image_name)
-            if auth_error:
-                return {"error": auth_error, "update_available": False}
 
             # Get current image details
             created_date = container.image.attrs.get('Created')
@@ -95,6 +93,8 @@ class UpdateService:
                 "image": image_name,
                 "created": created_date
             }
+            if auth_error:
+                result["auth_warning"] = auth_error
             return result
 
         except docker.errors.NotFound:
@@ -113,8 +113,6 @@ class UpdateService:
 
             # Authenticate before pulling to support private registries
             auth_error = self._ensure_registry_auth(image_name)
-            if auth_error:
-                return {"success": False, "error": auth_error}
 
             # 1. Pull latest image
             logger.info(f"Pulling latest image for {container_name}...")
@@ -169,7 +167,8 @@ class UpdateService:
             return {
                 "success": True,
                 "new_id": new_container.id,
-                "message": f"Successfully updated {container_name}"
+                "message": f"Successfully updated {container_name}",
+                **({"auth_warning": auth_error} if auth_error else {}),
             }
 
         except Exception as e:
