@@ -42,12 +42,43 @@ class NotificationService:
                 f"Message: {update_result.get('message') or update_result.get('error', '')}\n"
                 f"New ID: {update_result.get('new_id', '')}\n"
             )
+            badge_color = "#059669" if status == "SUCCESS" else "#dc2626"
+            html_body = f"""
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; background:#f8fafc; padding:24px; color:#0f172a;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px;">
+                <tr>
+                  <td style="padding:24px;">
+                    <h2 style="margin:0 0 12px; font-size:20px; color:#0f172a;">Lighthouse update result</h2>
+                    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:{badge_color}1A; color:{badge_color}; font-weight:700; font-size:12px; letter-spacing:0.5px;">
+                      <span style="display:inline-block; width:8px; height:8px; border-radius:999px; background:{badge_color};"></span>
+                      {status}
+                    </div>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top:18px; font-size:14px; color:#0f172a;">
+                      <tr>
+                        <td style="padding:8px 0; width:120px; font-weight:600;">Container</td>
+                        <td style="padding:8px 0;">{container_name}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0; width:120px; font-weight:600;">Message</td>
+                        <td style="padding:8px 0;">{update_result.get('message') or update_result.get('error', 'No message')}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0; width:120px; font-weight:600;">New ID</td>
+                        <td style="padding:8px 0;">{update_result.get('new_id', 'N/A')}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            """
 
             msg = EmailMessage()
             msg["Subject"] = subject
             msg["From"] = smtp_from
             msg["To"] = smtp_to
             msg.set_content(body)
+            msg.add_alternative(html_body, subtype="html")
 
             if use_tls:
                 context = ssl.create_default_context()

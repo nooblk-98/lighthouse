@@ -276,6 +276,10 @@ def perform_update(container_id: str):
 
     result = updater.update_container(container_id)
     if not result.get("success"):
+        try:
+            notifier.send_update_notification(container.name, {**result, "success": False, "message": result.get("error", "Update failed")})
+        except Exception:
+            pass
         history_service.log_event(
             action="update",
             status="error",
@@ -403,6 +407,10 @@ def update_all_containers():
                     details={"image": check_result.get("image"), "new_id": update_result.get("new_id")},
                 )
             else:
+                try:
+                    notifier.send_update_notification(name, {**update_result, "success": False, "message": update_result.get("error", "Update failed")})
+                except Exception:
+                    pass
                 results.append({
                     "id": c.id,
                     "name": name,
