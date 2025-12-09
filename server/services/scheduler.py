@@ -110,7 +110,6 @@ class SchedulerService:
                                 self.cache.update(container.name, {
                                     "update_available": False,
                                     "latest_id": update_res.get("new_id"),
-                                    "last_update_at": datetime.utcnow().isoformat()
                                 })
                                 self._record(
                                     action="auto_update",

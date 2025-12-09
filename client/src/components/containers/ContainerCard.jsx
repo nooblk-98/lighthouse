@@ -76,10 +76,6 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
     }
   };
 
-  const lastUpdate = container.update_status?.last_update_at
-    ? new Date(container.update_status.last_update_at).toLocaleString()
-    : 'N/A';
-
   return (
     <div className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 px-4 py-3">
       <div className="col-span-4 lg:col-span-3 flex items-start gap-3">
@@ -101,7 +97,6 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
           <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500' : 'bg-slate-500'}`} />
           {isRunning ? 'RUNNING' : container.state?.toUpperCase() || 'N/A'}
         </span>
-        <span className="text-slate-500 dark:text-slate-400">| Last Update: <span className="text-slate-800 dark:text-slate-200">{lastUpdate}</span></span>
         {updateStatus?.update_available ? (
           <span className="text-amber-600 dark:text-amber-300 font-semibold">Update available</span>
         ) : null}
