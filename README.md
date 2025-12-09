@@ -92,6 +92,10 @@ Run with compose:
 docker-compose -f docker-compose.live.yml up -d
 ```
 
+Run FrontEnd with remote Backend For developement 
+```bash
+$env:VITE_API_PROXY_TARGET="http://80.225.221.245:8000"; npm run dev
+```
 Dev with compose:
 ```bash
 docker compose build --no-cache && docker compose up
