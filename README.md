@@ -137,6 +137,9 @@ docker-compose build
 docker-compose logs -f backend
 docker-compose logs -f frontend
 ```
+
+Contributions welcome
+
 ## TODO / Ideas
 - Create login page for UI
 - ~~Support custom registry credentials~~
