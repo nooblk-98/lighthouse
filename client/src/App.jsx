@@ -219,6 +219,7 @@ function App() {
             error={historyError}
             onRefresh={refreshHistory}
             onClear={clearHistory}
+            theme={theme}
           />
         )}
       </main>
