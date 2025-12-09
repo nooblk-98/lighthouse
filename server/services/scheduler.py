@@ -10,15 +10,32 @@ logger = logging.getLogger(__name__)
 from services.cache import StatusCache
 
 class SchedulerService:
-    def __init__(self, settings_manager: SettingsManager, update_service: UpdateService, status_cache: StatusCache, notifier=None):
+    def __init__(
+        self,
+        settings_manager: SettingsManager,
+        update_service: UpdateService,
+        status_cache: StatusCache,
+        notifier=None,
+        history=None,
+    ):
         self.scheduler = BackgroundScheduler()
         self.settings = settings_manager
         self.updater = update_service
         self.cache = status_cache
         self.notifier = notifier
+        self.history = history
         self.job = None
         self.last_check_time = None
         self.next_check_time = None
+
+    def _record(self, **payload):
+        """Safely record a history entry if a history service is available."""
+        if not self.history:
+            return
+        try:
+            self.history.log_event(**payload)
+        except Exception as e:
+            logger.error(f"Failed to record history entry: {e}")
 
     def start(self):
         self.scheduler.start()
@@ -59,6 +76,13 @@ class SchedulerService:
                 try:
                     if self.settings.is_excluded(container.name):
                         self.cache.update(container.id, {"update_available": False, "skipped": True, "reason": "Container excluded from updates"})
+                        self._record(
+                            action="auto_scan",
+                            status="skipped",
+                            message="Container excluded from updates",
+                            container=container.name,
+                            trigger="auto",
+                        )
                         continue
 
                     # Check for update
@@ -66,12 +90,40 @@ class SchedulerService:
                     # Update cache
                     self.cache.update(container.id, result)
                     
+                    if result.get("error"):
+                        self._record(
+                            action="auto_scan",
+                            status="error",
+                            message=result.get("error"),
+                            container=container.name,
+                            trigger="auto",
+                        )
+                        continue
+
                     if result.get("update_available"):
                         logger.info(f"Update available for {container.name}")
                         if auto_update:
                             logger.info(f"Auto-updating {container.name}...")
                             update_res = self.updater.update_container(container.id)
                             logger.info(f"Update result: {update_res}")
+                            if update_res.get("success"):
+                                self._record(
+                                    action="auto_update",
+                                    status="updated",
+                                    message=update_res.get("message", "Updated successfully"),
+                                    container=container.name,
+                                    trigger="auto",
+                                    details={"image": result.get("image"), "new_id": update_res.get("new_id")},
+                                )
+                            else:
+                                self._record(
+                                    action="auto_update",
+                                    status="error",
+                                    message=update_res.get("error", "Update failed"),
+                                    container=container.name,
+                                    trigger="auto",
+                                    details={"image": result.get("image")},
+                                )
                             if self.notifier:
                                 try:
                                     self.notifier.send_update_notification(container.name, update_res)
@@ -84,8 +136,24 @@ class SchedulerService:
                                 # UpdateService returns new_id, but handles removal of old container.
                                 # Image prunning is separate.
                                 pass
+                        else:
+                            self._record(
+                                action="auto_scan",
+                                status="update_available",
+                                message="Update available; auto-update disabled",
+                                container=container.name,
+                                trigger="auto",
+                                details={"image": result.get("image"), "latest_id": result.get("latest_id")},
+                            )
                 except Exception as e:
                     logger.error(f"Error processing container {container.name}: {e}")
+                    self._record(
+                        action="auto_scan",
+                        status="error",
+                        message=str(e),
+                        container=container.name,
+                        trigger="auto",
+                    )
                     
         except Exception as e:
             logger.error(f"Scan failed: {e}")

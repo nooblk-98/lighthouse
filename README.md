@@ -92,6 +92,11 @@ Run with compose:
 docker-compose -f docker-compose.live.yml up -d
 ```
 
+Dev with compose:
+```bash
+docker compose build --no-cache && docker compose up
+```
+
 ## UI Preview
 
 <div align="center">

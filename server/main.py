@@ -6,6 +6,7 @@ import docker
 import smtplib
 from pydantic import BaseModel
 from typing import List, Optional
+from services.history import HistoryService
 
 app = FastAPI(title="Light House API", description="Docker Watchtower-like Monitor")
 
@@ -117,6 +118,7 @@ status_cache = StatusCache()
 
 from services.settings import SettingsManager
 settings_manager = SettingsManager()
+history_service = HistoryService()
 
 notifier = NotificationService(settings_manager)
 updater = UpdateService(settings_manager)
@@ -130,18 +132,45 @@ def check_update(container_id: str):
     if settings_manager.is_excluded(container.name):
         skipped = {"update_available": False, "skipped": True, "reason": "Container excluded from updates"}
         status_cache.update(container_id, skipped)
+        history_service.log_event(
+            action="check_update",
+            status="skipped",
+            message=skipped["reason"],
+            container=container.name,
+            trigger="manual",
+        )
         return skipped
 
     result = updater.check_for_update(container_id)
-    if "error" not in result:
+    if result.get("error"):
+        history_service.log_event(
+            action="check_update",
+            status="error",
+            message=result.get("error"),
+            container=container.name,
+            trigger="manual",
+        )
+    else:
         status_cache.update(container_id, result)
+        history_service.log_event(
+            action="check_update",
+            status="update_available" if result.get("update_available") else "up_to_date",
+            message="Update available" if result.get("update_available") else "No updates found",
+            container=container.name,
+            trigger="manual",
+            details={
+                "image": result.get("image"),
+                "latest_id": result.get("latest_id"),
+                "current_id": result.get("current_id"),
+            },
+        )
     return result
 
 
 from services.scheduler import SchedulerService
 
 # Pass updater to scheduler
-scheduler = SchedulerService(settings_manager, updater, status_cache, notifier)
+scheduler = SchedulerService(settings_manager, updater, status_cache, notifier, history_service)
 
 
 @app.on_event("startup")
@@ -157,6 +186,17 @@ def get_settings():
 @app.get("/api/schedule")
 def get_schedule():
     return scheduler.get_schedule_info()
+
+
+@app.get("/api/history")
+def get_history(action: str = None, status: str = None, limit: int = 100):
+    return history_service.get_history(action=action, status=status, limit=limit)
+
+
+@app.delete("/api/history")
+def clear_history():
+    history_service.clear()
+    return {"cleared": True}
 
 
 @app.post("/api/settings")
@@ -236,8 +276,26 @@ def perform_update(container_id: str):
 
     result = updater.update_container(container_id)
     if not result.get("success"):
+        history_service.log_event(
+            action="update",
+            status="error",
+            message=result.get("error", "Update failed"),
+            container=container.name,
+            trigger="manual",
+        )
         raise HTTPException(status_code=500, detail=result.get("error"))
     notifier.send_update_notification(container.name, result)
+    history_service.log_event(
+        action="update",
+        status="updated",
+        message=result.get("message", "Updated successfully"),
+        container=container.name,
+        trigger="manual",
+        details={
+            "new_id": result.get("new_id"),
+            "image": container.attrs['Config'].get('Image'),
+        },
+    )
     return result
 
 
@@ -270,6 +328,13 @@ def update_all_containers():
                 "reason": reason,
             })
             status_cache.update(c.id, {"update_available": False, "skipped": True, "reason": reason})
+            history_service.log_event(
+                action="bulk_update",
+                status="skipped",
+                message=reason,
+                container=name,
+                trigger="manual",
+            )
             continue
 
         try:
@@ -281,6 +346,13 @@ def update_all_containers():
                     "status": "error",
                     "message": check_result.get("error"),
                 })
+                history_service.log_event(
+                    action="bulk_update",
+                    status="error",
+                    message=check_result.get("error"),
+                    container=name,
+                    trigger="manual",
+                )
                 continue
 
             status_cache.update(c.id, check_result)
@@ -292,6 +364,14 @@ def update_all_containers():
                     "status": "up_to_date",
                     "message": "No updates found",
                 })
+                history_service.log_event(
+                    action="bulk_update",
+                    status="up_to_date",
+                    message="No updates found",
+                    container=name,
+                    trigger="manual",
+                    details={"image": check_result.get("image")},
+                )
                 continue
 
             update_result = updater.update_container(c.id)
@@ -308,6 +388,14 @@ def update_all_containers():
                     "current_id": check_result.get("latest_id"),
                     "latest_id": check_result.get("latest_id"),
                 })
+                history_service.log_event(
+                    action="bulk_update",
+                    status="updated",
+                    message=update_result.get("message", "Updated successfully"),
+                    container=name,
+                    trigger="manual",
+                    details={"image": check_result.get("image"), "new_id": update_result.get("new_id")},
+                )
             else:
                 results.append({
                     "id": c.id,
@@ -315,6 +403,14 @@ def update_all_containers():
                     "status": "error",
                     "message": update_result.get("error", "Update failed"),
                 })
+                history_service.log_event(
+                    action="bulk_update",
+                    status="error",
+                    message=update_result.get("error", "Update failed"),
+                    container=name,
+                    trigger="manual",
+                    details={"image": check_result.get("image")},
+                )
         except Exception as e:
             results.append({
                 "id": c.id,
@@ -322,6 +418,13 @@ def update_all_containers():
                 "status": "error",
                 "message": str(e),
             })
+            history_service.log_event(
+                action="bulk_update",
+                status="error",
+                message=str(e),
+                container=name,
+                trigger="manual",
+            )
 
     summary = {
         "updated": len([r for r in results if r["status"] == "updated"]),
