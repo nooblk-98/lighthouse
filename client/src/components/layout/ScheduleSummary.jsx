@@ -29,7 +29,7 @@ const ScheduleSummary = ({ scheduleEnabled, lastCheckLabel, nextCheckLabel }) =>
           </div>
         </div>
 
-        <div className="hidden h-12 w-px bg-gray-200 sm:block" />
+        <div className="hidden h-12 w-px bg-gray-200 sm:block dark:bg-slate-700" />
 
         <div className="flex items-center gap-2 text-gray-800 dark:text-slate-100">
           <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-200">

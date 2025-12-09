@@ -5,21 +5,21 @@ import { validateRegistry, validateSmtp, exportSettingsBackup, importSettingsBac
 
 const SectionTitle = ({ icon: Icon, title, description }) => (
   <div className="flex items-start gap-3 mb-4">
-    <div className="h-10 w-10 inline-flex items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+    <div className="h-10 w-10 inline-flex items-center justify-center rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-200">
       <Icon size={18} />
     </div>
     <div>
-      <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-      {description ? <p className="text-sm text-gray-600">{description}</p> : null}
+      <h3 className="text-base font-semibold text-gray-900 dark:text-slate-100">{title}</h3>
+      {description ? <p className="text-sm text-gray-600 dark:text-slate-300">{description}</p> : null}
     </div>
   </div>
 );
 
 const Toggle = ({ label, checked, onChange, helper }) => (
-  <div className="flex items-center justify-between gap-3 border border-gray-200 rounded-md px-3 py-2">
+  <div className="flex items-center justify-between gap-3 border border-gray-200 rounded-md px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
     <div>
-      <div className="text-sm font-medium text-gray-800">{label}</div>
-      {helper ? <div className="text-xs text-gray-500">{helper}</div> : null}
+      <div className="text-sm font-medium text-gray-800 dark:text-slate-100">{label}</div>
+      {helper ? <div className="text-xs text-gray-500 dark:text-slate-400">{helper}</div> : null}
     </div>
     <button
       type="button"
@@ -30,7 +30,7 @@ const Toggle = ({ label, checked, onChange, helper }) => (
       aria-pressed={checked}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+        className={`inline-block h-5 w-5 transform rounded-full bg-white dark:bg-slate-900 shadow transition ${
           checked ? 'translate-x-5' : 'translate-x-0.5'
         }`}
       />
@@ -40,10 +40,10 @@ const Toggle = ({ label, checked, onChange, helper }) => (
 
 const StatusChip = ({ state, message }) => {
   const map = {
-    success: { text: 'Success', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    error: { text: 'Error', className: 'bg-red-50 text-red-700 border-red-200' },
-    validating: { text: 'Validating', className: 'bg-amber-50 text-amber-700 border-amber-200' },
-    idle: { text: 'Not validated', className: 'bg-gray-50 text-gray-600 border-gray-200' },
+    success: { text: 'Success', className: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-100 dark:border-emerald-800' },
+    error: { text: 'Error', className: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-100 dark:border-red-800' },
+    validating: { text: 'Validating', className: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800' },
+    idle: { text: 'Not validated', className: 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700' },
   };
   const cfg = map[state] || map.idle;
   return (
@@ -114,9 +114,9 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
   };
 
   const statusClasses = (type) => {
-    if (type === 'success') return 'text-green-700 bg-green-50 border border-green-200';
-    if (type === 'error') return 'text-red-700 bg-red-50 border border-red-200';
-    return 'text-gray-700 bg-gray-50 border border-gray-200';
+    if (type === 'success') return 'text-green-700 bg-green-50 border border-green-200 dark:text-green-100 dark:bg-green-900/40 dark:border-green-800';
+    if (type === 'error') return 'text-red-700 bg-red-50 border border-red-200 dark:text-red-100 dark:bg-red-900/40 dark:border-red-800';
+    return 'text-gray-700 dark:text-slate-200 bg-gray-50 border border-gray-200 dark:text-slate-200 dark:bg-slate-800 dark:border-slate-700';
   };
 
   const handleExport = async () => {
@@ -239,11 +239,11 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-5xl grid grid-cols-1 md:grid-cols-4 overflow-hidden">
-        <div className="bg-gray-50 border-r border-gray-200 p-4 md:p-6">
+      <div className="bg-white dark:bg-slate-900 dark:bg-slate-900 rounded-lg shadow-2xl w-full max-w-5xl grid grid-cols-1 md:grid-cols-4 overflow-hidden dark:border dark:border-slate-800">
+        <div className="bg-gray-50 border-r border-gray-200 p-4 md:p-6 dark:bg-slate-950 dark:border-slate-800">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 md:hidden">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Settings</h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-slate-200 md:hidden dark:text-slate-300 dark:hover:text-slate-100">
               <X size={22} />
             </button>
           </div>
@@ -258,8 +258,8 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                   onClick={() => setActiveSection(item.id)}
                   className={`w-full flex items-center gap-2 px-3 py-2 rounded-md border ${
                     active
-                      ? 'border-indigo-200 bg-indigo-50 text-indigo-700'
-                      : 'border-transparent text-gray-700 hover:bg-gray-100'
+                      ? 'border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-100'
+                      : 'border-transparent text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800'
                   }`}
                 >
                   <Icon size={18} />
@@ -272,7 +272,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
 
         <form onSubmit={handleSubmit} className="md:col-span-3 p-4 md:p-8 space-y-8">
           <div className="hidden md:flex items-center justify-end">
-            <button onClick={onClose} type="button" className="text-gray-500 hover:text-gray-700">
+            <button onClick={onClose} type="button" className="text-gray-500 hover:text-gray-700 dark:text-slate-200 dark:text-slate-300 dark:hover:text-slate-100">
               <X size={22} />
             </button>
           </div>
@@ -294,7 +294,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">
                     Check Interval (minutes)
                   </label>
                   <input
@@ -303,7 +303,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                     value={formData.check_interval_minutes}
                     onChange={handleChange}
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
@@ -346,71 +346,71 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Host</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">SMTP Host</label>
                   <input
                     type="text"
                     name="smtp_host"
                     value={formData.smtp_host}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="smtp.example.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Port</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">SMTP Port</label>
                   <input
                     type="number"
                     name="smtp_port"
                     value={formData.smtp_port}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Username</label>
                   <input
                     type="text"
                     name="smtp_username"
                     value={formData.smtp_username}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Password</label>
                   <input
                     type="password"
                     name="smtp_password"
                     value={formData.smtp_password}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">From</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">From</label>
                   <input
                     type="email"
                     name="smtp_from"
                     value={formData.smtp_from}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="noreply@example.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">To</label>
                   <input
                     type="email"
                     name="smtp_to"
                     value={formData.smtp_to}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="ops@example.com"
                   />
                 </div>
@@ -439,24 +439,24 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Docker Hub username</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Docker Hub username</label>
                     <input
                       type="text"
                       name="dockerhub_username"
                       value={formData.dockerhub_username}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="dockerhub user"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Docker Hub token</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Docker Hub token</label>
                     <input
                       type="password"
                       name="dockerhub_token"
                       value={formData.dockerhub_token}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="access token / PAT"
                     />
                   </div>
@@ -479,24 +479,24 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">GHCR username</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">GHCR username</label>
                     <input
                       type="text"
                       name="ghcr_username"
                       value={formData.ghcr_username}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="github user"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">GHCR token</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">GHCR token</label>
                     <input
                       type="password"
                       name="ghcr_token"
                       value={formData.ghcr_token}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="ghcr PAT with read:packages"
                     />
                   </div>
@@ -535,7 +535,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Encryption password</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-200">Encryption password</label>
                     <input
                       type="password"
                       value={backupPassword}
@@ -543,24 +543,24 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                         setBackupPassword(e.target.value);
                         setImportPassword(e.target.value);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="Required for export and import"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Export format</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Export format</label>
                       <select
                         value={backupFormat}
                         onChange={(e) => setBackupFormat(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-900"
                       >
                         <option value="json">JSON</option>
                         <option value="yaml">YAML</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">&nbsp;</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">&nbsp;</label>
                       <button
                         type="button"
                         onClick={handleExport}
@@ -586,19 +586,19 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Encryption password</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-200">Encryption password</label>
                     <input
                       type="password"
                       value={importPassword}
                       onChange={(e) => setImportPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="Password used when exporting"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Backup file</label>
-                      <label className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white cursor-pointer text-sm text-gray-700 hover:border-indigo-400 transition">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Backup file</label>
+                      <label className="flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-900 cursor-pointer text-sm text-gray-700 dark:text-slate-200 hover:border-indigo-400 transition">
                         <span className="truncate">{importFileName || 'Choose backup file'}</span>
                         <input
                           ref={fileInputRef}
@@ -619,7 +619,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">&nbsp;</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">&nbsp;</label>
                       <button
                         type="button"
                         onClick={handleImport}
@@ -645,7 +645,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 bg-gray-100 rounded-md hover:bg-gray-200"
               >
                 Cancel
               </button>

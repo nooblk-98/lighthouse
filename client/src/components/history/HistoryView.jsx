@@ -53,7 +53,7 @@ const HistoryItem = ({ entry }) => {
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-semibold text-gray-900">{entry.container || 'System'}</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{entry.container || 'System'}</span>
             <StatusBadge status={entry.status} />
           </div>
           <div className="text-sm text-gray-700 dark:text-slate-200">
