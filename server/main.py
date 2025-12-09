@@ -102,7 +102,7 @@ def list_containers():
                 state=c.attrs['State']['Status'],
                 created=c.attrs.get('Created') or c.image.attrs.get('Created'),
                 excluded=settings_manager.is_excluded(c.name),
-                update_status=status_cache.get(c.id)
+                update_status=status_cache.get(c.name)
             ))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -131,7 +131,7 @@ def check_update(container_id: str):
     container = get_container_or_404(container_id)
     if settings_manager.is_excluded(container.name):
         skipped = {"update_available": False, "skipped": True, "reason": "Container excluded from updates"}
-        status_cache.update(container_id, skipped)
+        status_cache.update(container.name, skipped)
         history_service.log_event(
             action="check_update",
             status="skipped",
@@ -151,7 +151,7 @@ def check_update(container_id: str):
             trigger="manual",
         )
     else:
-        status_cache.update(container_id, result)
+        status_cache.update(container.name, result)
         history_service.log_event(
             action="check_update",
             status="update_available" if result.get("update_available") else "up_to_date",
@@ -296,6 +296,10 @@ def perform_update(container_id: str):
             "image": container.attrs['Config'].get('Image'),
         },
     )
+    status_cache.update(container.name, {
+        "update_available": False,
+        "latest_id": result.get("new_id"),
+    })
     return result
 
 
@@ -327,7 +331,7 @@ def update_all_containers():
                 "status": "skipped",
                 "reason": reason,
             })
-            status_cache.update(c.id, {"update_available": False, "skipped": True, "reason": reason})
+            status_cache.update(name, {"update_available": False, "skipped": True, "reason": reason})
             history_service.log_event(
                 action="bulk_update",
                 status="skipped",
@@ -346,6 +350,7 @@ def update_all_containers():
                     "status": "error",
                     "message": check_result.get("error"),
                 })
+                status_cache.update(name, check_result)
                 history_service.log_event(
                     action="bulk_update",
                     status="error",
@@ -355,7 +360,7 @@ def update_all_containers():
                 )
                 continue
 
-            status_cache.update(c.id, check_result)
+            status_cache.update(name, check_result)
 
             if not check_result.get("update_available"):
                 results.append({
@@ -364,6 +369,7 @@ def update_all_containers():
                     "status": "up_to_date",
                     "message": "No updates found",
                 })
+                status_cache.update(name, check_result)
                 history_service.log_event(
                     action="bulk_update",
                     status="up_to_date",
@@ -383,7 +389,7 @@ def update_all_containers():
                     "message": update_result.get("message", "Updated successfully"),
                 })
                 notifier.send_update_notification(name, update_result)
-                status_cache.update(c.id, {
+                status_cache.update(name, {
                     "update_available": False,
                     "current_id": check_result.get("latest_id"),
                     "latest_id": check_result.get("latest_id"),

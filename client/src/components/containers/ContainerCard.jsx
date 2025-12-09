@@ -77,8 +77,8 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
   };
 
   return (
-    <div className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 px-4 py-3">
-      <div className="col-span-4 lg:col-span-3 flex items-start gap-3">
+    <div className="flex flex-col md:grid md:grid-cols-12 md:items-center gap-3 md:gap-4 px-4 py-3">
+      <div className="col-span-4 flex items-start gap-3">
         <div className={`p-2 rounded-md flex-shrink-0 ${isRunning ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300'}`}>
           <Box size={18} />
         </div>
@@ -88,22 +88,21 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
         </div>
       </div>
 
-      <div className="col-span-3 lg:col-span-2 text-xs text-slate-500 dark:text-slate-400 flex items-center">
+      <div className="col-span-3 text-xs text-slate-500 dark:text-slate-400 flex items-center whitespace-nowrap">
         {createdDisplay}
       </div>
 
-      <div className="col-span-3 lg:col-span-4 text-xs flex flex-wrap gap-2 items-center text-slate-600 dark:text-slate-300">
-        <span className={`font-semibold px-2 py-1 rounded-sm flex items-center gap-2 ${isRunning ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
+      <div className="col-span-2 text-xs flex flex-nowrap gap-2 items-center text-slate-600 dark:text-slate-300">
+        <span className={`font-semibold px-2 py-1 rounded-sm inline-flex items-center gap-2 ${isRunning ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
           <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500' : 'bg-slate-500'}`} />
           {isRunning ? 'RUNNING' : container.state?.toUpperCase() || 'N/A'}
         </span>
-        <span className="text-slate-500 dark:text-slate-400">| Last Update: <span className="text-slate-800 dark:text-slate-200">N/A</span></span>
         {updateStatus?.update_available ? (
           <span className="text-amber-600 dark:text-amber-300 font-semibold">Update available</span>
         ) : null}
       </div>
 
-      <div className="col-span-2 lg:col-span-3 flex items-center justify-end gap-3 text-xs md:text-sm">
+      <div className="col-span-3 flex items-center justify-end gap-3 text-xs md:text-sm whitespace-nowrap">
         <label className="flex items-center cursor-pointer" htmlFor={`update-toggle-${container.id}`}>
           <input
             checked={!isExcluded}

@@ -107,6 +107,10 @@ class SchedulerService:
                             update_res = self.updater.update_container(container.id)
                             logger.info(f"Update result: {update_res}")
                             if update_res.get("success"):
+                                self.cache.update(container.name, {
+                                    "update_available": False,
+                                    "latest_id": update_res.get("new_id"),
+                                })
                                 self._record(
                                     action="auto_update",
                                     status="updated",
