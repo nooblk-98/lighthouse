@@ -54,12 +54,15 @@ class NotificationService:
                 f"Container: {container_name}\n"
                 f"Status: {status}\n"
                 f"Message: {update_result.get('message') or update_result.get('error', '')}\n"
-                f"New ID: {update_result.get('new_id', '')}\n"
+                f"Image: {update_result.get('image', '')}\n"
             )
             badge_color = "#059669" if status == "SUCCESS" else "#dc2626"
             status_label = "Updated" if status == "SUCCESS" else "Failed"
             message_text = update_result.get('message') or update_result.get('error', 'No message provided')
-            new_id_text = update_result.get('new_id') or 'N/A'
+            image_text = update_result.get('image') or 'N/A'
+            badge_bg = f"{badge_color}1A"
+            badge_text = badge_color if status == "SUCCESS" else "#dc2626"
+            badge_dot = badge_color if status == "SUCCESS" else "#ef4444"
             html_body = f"""
             <div style="margin:0;padding:0;background:#f5f7fb;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background:#f5f7fb;padding:24px 0;">
@@ -72,8 +75,8 @@ class NotificationService:
                             <tr>
                               <td style="font-family:'Segoe UI', Arial, sans-serif; font-size:18px; font-weight:700; color:#fff;">Lighthouse update result</td>
                               <td align="right">
-                                <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:{badge_color}1A; color:{badge_color}; font-weight:700; font-size:12px; letter-spacing:0.5px; text-transform:uppercase;">
-                                  <span style="display:inline-block; width:8px; height:8px; border-radius:999px; background:{badge_color};"></span>
+                                <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:{badge_bg}; color:{badge_text}; font-weight:700; font-size:12px; letter-spacing:0.5px; text-transform:uppercase;">
+                                  <span style="display:inline-block; width:8px; height:8px; border-radius:999px; background:{badge_dot};"></span>
                                   {status_label}
                                 </div>
                               </td>
@@ -89,12 +92,12 @@ class NotificationService:
                               <td style="padding:10px 0;">{container_name}</td>
                             </tr>
                             <tr>
-                              <td style="padding:10px 0; width:140px; font-weight:700;">Message</td>
-                              <td style="padding:10px 0; color:#0f172a;">{message_text}</td>
+                              <td style="padding:10px 0; width:140px; font-weight:700;">Image</td>
+                              <td style="padding:10px 0;">{image_text}</td>
                             </tr>
                             <tr>
-                              <td style="padding:10px 0; width:140px; font-weight:700;">New ID</td>
-                              <td style="padding:10px 0;">{new_id_text}</td>
+                              <td style="padding:10px 0; width:140px; font-weight:700;">Message</td>
+                              <td style="padding:10px 0; color:#0f172a;">{message_text}</td>
                             </tr>
                           </table>
                         </td>
