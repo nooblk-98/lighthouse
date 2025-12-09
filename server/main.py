@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import docker
 import smtplib
+from datetime import datetime
 from pydantic import BaseModel
 from typing import List, Optional
 from services.history import HistoryService
@@ -296,6 +297,11 @@ def perform_update(container_id: str):
             "image": container.attrs['Config'].get('Image'),
         },
     )
+    status_cache.update(container_id, {
+        "update_available": False,
+        "latest_id": result.get("new_id"),
+        "last_update_at": datetime.utcnow().isoformat(),
+    })
     return result
 
 
@@ -387,6 +393,7 @@ def update_all_containers():
                     "update_available": False,
                     "current_id": check_result.get("latest_id"),
                     "latest_id": check_result.get("latest_id"),
+                    "last_update_at": datetime.utcnow().isoformat(),
                 })
                 history_service.log_event(
                     action="bulk_update",
