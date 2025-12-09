@@ -15,3 +15,4 @@ client/node_modules
 server/__pycache__/
 server/.venv
 server/*.pyc
+./client/vite.config.js
