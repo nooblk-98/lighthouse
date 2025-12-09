@@ -112,7 +112,7 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
             id={`update-toggle-${container.id}`}
             type="checkbox"
           />
-          <div className="relative w-10 h-5 rounded-full bg-slate-200 dark:bg-slate-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-slate-300 dark:after:border-slate-700 after:rounded-full after:h-4 after:w-4 after:transition-all toggle-switch-bg" />
+          <div className="relative w-10 h-5 rounded-full bg-slate-200 dark:bg-slate-700 peer-checked:bg-emerald-500 peer-checked:after:translate-x-full peer-checked:after:border-emerald-500 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-slate-300 dark:after:border-slate-700 after:rounded-full after:h-4 after:w-4 after:transition-all toggle-switch-bg" />
           <span className={`ml-2 transition-colors ${isExcluded ? 'text-slate-500' : 'text-emerald-600 dark:text-emerald-300'}`}>Updates</span>
         </label>
         <button
