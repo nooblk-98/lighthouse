@@ -79,27 +79,27 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
   return (
     <div className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-4 px-4 py-3">
       <div className="col-span-4 lg:col-span-3 flex items-start gap-3">
-        <div className={`p-2 rounded-md flex-shrink-0 ${isRunning ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'}`}>
+        <div className={`p-2 rounded-md flex-shrink-0 ${isRunning ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300'}`}>
           <Box size={18} />
         </div>
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-slate-100 truncate">{container.name}</h3>
-          <p className="text-xs text-slate-400 font-mono truncate" title={container.image}>{container.image}</p>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{container.name}</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate" title={container.image}>{container.image}</p>
         </div>
       </div>
 
-      <div className="col-span-3 lg:col-span-2 text-xs text-slate-400 flex items-center">
+      <div className="col-span-3 lg:col-span-2 text-xs text-slate-500 dark:text-slate-400 flex items-center">
         {createdDisplay}
       </div>
 
-      <div className="col-span-3 lg:col-span-4 text-xs flex flex-wrap gap-2 items-center text-slate-300">
-        <span className={`font-semibold px-2 py-1 rounded-sm flex items-center gap-2 ${isRunning ? 'bg-emerald-500/20 text-emerald-200' : 'bg-slate-800 text-slate-300'}`}>
-          <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-400' : 'bg-slate-500'}`} />
+      <div className="col-span-3 lg:col-span-4 text-xs flex flex-wrap gap-2 items-center text-slate-600 dark:text-slate-300">
+        <span className={`font-semibold px-2 py-1 rounded-sm flex items-center gap-2 ${isRunning ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
+          <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-emerald-500' : 'bg-slate-500'}`} />
           {isRunning ? 'RUNNING' : container.state?.toUpperCase() || 'N/A'}
         </span>
-        <span className="text-slate-400">| Last Update: <span className="text-slate-200">N/A</span></span>
+        <span className="text-slate-500 dark:text-slate-400">| Last Update: <span className="text-slate-800 dark:text-slate-200">N/A</span></span>
         {updateStatus?.update_available ? (
-          <span className="text-amber-300 font-semibold">Update available</span>
+          <span className="text-amber-600 dark:text-amber-300 font-semibold">Update available</span>
         ) : null}
       </div>
 
@@ -112,16 +112,16 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
             id={`update-toggle-${container.id}`}
             type="checkbox"
           />
-          <div className="relative w-10 h-5 bg-slate-700 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-slate-700 after:rounded-full after:h-4 after:w-4 after:transition-all toggle-switch-bg" />
-          <span className={`ml-2 transition-colors ${isExcluded ? 'text-slate-400' : 'text-emerald-300'}`}>Updates</span>
+          <div className="relative w-10 h-5 rounded-full bg-slate-200 dark:bg-slate-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-slate-300 dark:after:border-slate-700 after:rounded-full after:h-4 after:w-4 after:transition-all toggle-switch-bg" />
+          <span className={`ml-2 transition-colors ${isExcluded ? 'text-slate-500' : 'text-emerald-600 dark:text-emerald-300'}`}>Updates</span>
         </label>
         <button
           onClick={handleCheck}
           disabled={checking || updating || toggling || isExcluded}
           className={`flex items-center gap-1 px-3 py-1.5 rounded-sm text-xs font-semibold transition-colors ${
             isExcluded
-              ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-              : 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/40'
+              ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed'
+              : 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-500/20 dark:text-blue-300 dark:hover:bg-blue-500/40'
           }`}
         >
           <RefreshCw size={14} className={checking ? 'animate-spin' : ''} />
@@ -132,14 +132,14 @@ const ContainerCard = ({ container, onCheckUpdate, onUpdate, onToggleExclusion, 
       {updateStatus ? (
         <div className="col-span-12">
           <div
-            className={`mt-2 text-xs md:text-sm rounded-md px-3 py-2 ${
+            className={`mt-2 text-xs md:text-sm rounded-md px-3 py-2 border ${
               updateStatus.error
-                ? 'bg-red-900/40 text-red-100 border border-red-800'
+                ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-100 dark:border-red-800'
                 : updateStatus.skipped
-                  ? 'bg-slate-800 text-slate-200 border border-slate-700'
+                  ? 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
                   : updateStatus.update_available
-                    ? 'bg-amber-900/40 text-amber-100 border border-amber-800'
-                    : 'bg-blue-900/40 text-blue-100 border border-blue-800'
+                    ? 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-100 dark:border-amber-800'
+                    : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-100 dark:border-blue-800'
             }`}
           >
             {updateStatus.error
