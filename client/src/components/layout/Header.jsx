@@ -32,7 +32,7 @@ const Header = ({
           <img src="/logo.svg" alt="Light House logo" className="h-10 w-10 rounded-full shadow-sm" />
           <div className="flex flex-col gap-1 leading-tight">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-50">Light House</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-50">LightHouse</h1>
               <div className="flex flex-wrap items-center gap-2">
                 <Pill
                   active={!!scheduleEnabled}
