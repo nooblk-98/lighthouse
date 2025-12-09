@@ -164,38 +164,27 @@ const HistorySection = ({ title, description, icon: Icon, entries, emptyMessage 
 const HistoryView = ({ entries = [], loading, error, onRefresh, onClear, theme }) => {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 text-gray-900 dark:text-slate-100">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
-              <HistoryIcon size={18} />
-            </span>
-            <h2 className="text-xl font-bold tracking-tight">History</h2>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-slate-300">Recent update attempts, auto-runs, and errors.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50
-              border-gray-200 bg-white text-gray-700 hover:bg-gray-50
-              dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-          >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Refresh history
-          </button>
-          <button
-            onClick={onClear}
-            disabled={loading || entries.length === 0}
-            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50
-              border-red-200 bg-red-50 text-red-700 hover:bg-red-100
-              dark:border-red-800 dark:bg-red-900/40 dark:text-red-100 dark:hover:bg-red-900/60"
-          >
-            <Eraser size={16} />
-            Clear history
-          </button>
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <button
+          onClick={onRefresh}
+          disabled={loading}
+          className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50
+            border-gray-200 bg-white text-gray-700 hover:bg-gray-50
+            dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          Refresh history
+        </button>
+        <button
+          onClick={onClear}
+          disabled={loading || entries.length === 0}
+          className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50
+            border-red-200 bg-red-50 text-red-700 hover:bg-red-100
+            dark:border-red-800 dark:bg-red-900/40 dark:text-red-100 dark:hover:bg-red-900/60"
+        >
+          <Eraser size={16} />
+          Clear history
+        </button>
       </div>
 
       {error ? <ErrorBanner message={error} /> : null}
