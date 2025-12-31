@@ -1,0 +1,67 @@
+# Multi-stage build combining backend and frontend
+
+# Stage 1: Build Frontend
+FROM node:18-alpine as frontend-build
+
+WORKDIR /app/client
+
+COPY client/package*.json ./
+RUN npm install
+
+COPY client/ ./
+RUN npm run build
+
+# Stage 2: Production - Combined Backend + Frontend
+FROM python:3.10-slim
+
+# Install nginx and supervisor
+RUN apt-get update && apt-get install -y \
+    nginx \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory for backend
+WORKDIR /app
+
+# Install Python dependencies
+COPY server/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend code
+COPY server/ .
+
+# Copy built frontend from build stage
+COPY --from=frontend-build /app/client/dist /usr/share/nginx/html
+
+# Copy nginx configuration for production (proxies to localhost:8000)
+COPY client/nginx.production.conf /etc/nginx/sites-available/default
+
+# Create supervisor configuration
+RUN mkdir -p /var/log/supervisor
+
+COPY <<EOF /etc/supervisor/conf.d/supervisord.conf
+[supervisord]
+nodaemon=true
+user=root
+
+[program:nginx]
+command=nginx -g 'daemon off;'
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/supervisor/nginx.log
+stderr_logfile=/var/log/supervisor/nginx_error.log
+
+[program:backend]
+command=python -m uvicorn main:app --host 127.0.0.1 --port 8000
+directory=/app
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/supervisor/backend.log
+stderr_logfile=/var/log/supervisor/backend_error.log
+EOF
+
+# Expose only nginx port
+EXPOSE 80
+
+# Start supervisor to manage both services
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
