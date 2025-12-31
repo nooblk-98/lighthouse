@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   lighthouse:
-    build:
-      context: .
-      dockerfile: Dockerfile.production
+    image: lahiru98s/lighthouse:latest
     container_name: lighthouse
     ports:
       - "8066:80"
