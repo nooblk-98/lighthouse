@@ -3,8 +3,8 @@
     "auto_update_enabled": false,
     "cleanup_enabled": false,
     "excluded_containers": [
-        "lighthouse-frontend",
-        "lighthouse-backend"
+        "lighthouse",
+        "sample_container"
     ],
     "notifications_enabled": false,
     "smtp_host": "",
