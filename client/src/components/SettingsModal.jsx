@@ -54,6 +54,9 @@ const StatusChip = ({ state, message }) => {
 };
 
 const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, loading }) => {
+  const webhookEndpoint = typeof window !== 'undefined'
+    ? `${window.location.origin}/api/webhook/update`
+    : 'http://localhost:8066/api/webhook/update';
   const [formData, setFormData] = useState({
     ...DEFAULT_SETTINGS,
     ...settings,
@@ -539,7 +542,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                 <div className="text-xs text-gray-600 dark:text-slate-300">
                   Sample curl request:
                   <pre className="mt-2 whitespace-pre-wrap rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-[11px] text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                    {`curl -X POST http://localhost:8000/api/webhook/update \\
+                    {`curl -X POST ${webhookEndpoint} \\
   -H "X-Webhook-Token: <token>" \\
   -H "Content-Type: application/json" \\
   -d '{"container_name":"your-container"}'`}
