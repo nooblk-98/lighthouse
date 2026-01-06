@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: development
+    container_name: lighthouse-backend-dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./server:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: lighthouse-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app/client
+      - /app/client/node_modules
+    environment:
+      - VITE_API_PROXY_TARGET=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    command: npm run dev

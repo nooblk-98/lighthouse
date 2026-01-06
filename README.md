@@ -86,7 +86,7 @@ $env:VITE_API_PROXY_TARGET="http://80.225.221.245:8000"; npm run dev
 ```
 Dev with compose:
 ```bash
-docker compose build --no-cache && docker compose up
+docker compose -f docker-compose.dev.yml up --build
 ```
 
 ## UI Preview
@@ -98,6 +98,11 @@ docker compose build --no-cache && docker compose up
 </div>
 
 ## Development
+
+### Run both services with Docker (recommended)
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
 
 ### Run locally without Docker
 
@@ -113,6 +118,11 @@ python main.py
 cd client
 npm install
 npm run dev
+```
+
+For a non-local backend, set `VITE_API_PROXY_TARGET` before running Vite:
+```bash
+$env:VITE_API_PROXY_TARGET="http://your-backend:8000"
 ```
 
 ### Build images locally
