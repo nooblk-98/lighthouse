@@ -1,5 +1,19 @@
+# Development Stage
+FROM node:22-alpine as development
+
+WORKDIR /app/client
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]
+
 # Build Stage
-FROM node:18-alpine as build
+FROM node:22-alpine as build
 
 WORKDIR /app
 

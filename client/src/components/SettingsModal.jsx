@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Save, Bell, Settings2, Mail, ShieldCheck, Download, Upload, Shield } from 'lucide-react';
+import { X, Save, Bell, Settings2, ShieldCheck, Download, Upload, Shield, Key } from 'lucide-react';
 import { DEFAULT_SETTINGS } from '../constants/settings';
 import { validateRegistry, validateSmtp, exportSettingsBackup, importSettingsBackup, sendTestEmail } from '../api/settings';
 
@@ -236,6 +236,7 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
     { id: 'general', label: 'General', icon: Settings2 },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'registries', label: 'Registries', icon: ShieldCheck },
+    { id: 'webhook', label: 'Webhook', icon: Key },
     { id: 'backup', label: 'Backup', icon: Shield },
   ]), []);
 
@@ -517,6 +518,43 @@ const SettingsModal = ({ isOpen, onClose, settings = DEFAULT_SETTINGS, onSave, l
                   >
                     {registryStatus.ghcr?.state === 'validating' ? 'Validating...' : 'Save'}
                   </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {activeSection === 'webhook' ? (
+            <div className="space-y-6">
+              <SectionTitle
+                icon={Key}
+                title="Webhook"
+                description="Set a secret token for manual update webhooks."
+              />
+
+              <div className="space-y-3">
+                <div className="text-xs text-gray-600 dark:text-slate-300">
+                  Use this token in the `X-Webhook-Token` header or `Authorization: Bearer &lt;token&gt;` when calling
+                  `/api/webhook/update`.
+                </div>
+                <div className="text-xs text-gray-600 dark:text-slate-300">
+                  Sample curl request:
+                  <pre className="mt-2 whitespace-pre-wrap rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-[11px] text-gray-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                    {`curl -X POST http://localhost:8000/api/webhook/update \\
+  -H "X-Webhook-Token: <token>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"container_name":"your-container"}'`}
+                  </pre>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Webhook token</label>
+                  <input
+                    type="password"
+                    name="webhook_token"
+                    value={formData.webhook_token}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-slate-700 dark:text-slate-50 dark:border-slate-600"
+                    placeholder="long random secret"
+                  />
                 </div>
               </div>
             </div>

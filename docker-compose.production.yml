@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  lighthouse:
+    image: lahiru98s/lighthouse:latest
+    container_name: lighthouse
+    ports:
+      - "8066:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./settings.json:/app/settings.json
+    restart: always
+    networks:
+      - lighthouse-net
+
+networks:
+  lighthouse-net:
+    driver: bridge

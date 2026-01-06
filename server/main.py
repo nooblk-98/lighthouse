@@ -1,5 +1,6 @@
 import io
-from fastapi import FastAPI, HTTPException
+import os
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import docker
@@ -70,6 +71,11 @@ class SettingsImport(BaseModel):
 class TestNotification(BaseModel):
     message: str | None = None
 
+class WebhookUpdateRequest(BaseModel):
+    container_id: Optional[str] = None
+    container_name: Optional[str] = None
+    update_all: bool = False
+
 
 @app.get("/")
 def read_root():
@@ -85,6 +91,21 @@ def get_container_or_404(container_id: str):
         raise HTTPException(status_code=404, detail="Container not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def get_webhook_token() -> str:
+    token = os.environ.get("WEBHOOK_TOKEN")
+    if token:
+        return token
+    return settings_manager.get("webhook_token") or ""
+
+
+def extract_webhook_token(x_webhook_token: Optional[str], authorization: Optional[str]) -> str:
+    if x_webhook_token:
+        return x_webhook_token.strip()
+    if authorization and authorization.lower().startswith("bearer "):
+        return authorization.split(" ", 1)[1].strip()
+    return ""
 
 
 @app.get("/api/containers", response_model=List[ContainerInfo])
@@ -466,6 +487,30 @@ def update_all_containers():
     }
 
     return {"results": results, "summary": summary}
+
+
+@app.post("/api/webhook/update")
+def webhook_update(
+    payload: WebhookUpdateRequest,
+    x_webhook_token: Optional[str] = Header(default=None, alias="X-Webhook-Token"),
+    authorization: Optional[str] = Header(default=None),
+):
+    configured_token = get_webhook_token()
+    if not configured_token:
+        raise HTTPException(status_code=400, detail="Webhook token not configured")
+
+    provided_token = extract_webhook_token(x_webhook_token, authorization)
+    if not provided_token or provided_token != configured_token:
+        raise HTTPException(status_code=401, detail="Invalid webhook token")
+
+    if payload.update_all:
+        return update_all_containers()
+    if payload.container_id:
+        return perform_update(payload.container_id)
+    if payload.container_name:
+        return perform_update(payload.container_name)
+
+    raise HTTPException(status_code=400, detail="Provide container_id, container_name, or update_all=true")
 
 
 if __name__ == "__main__":
