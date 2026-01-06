@@ -17,5 +17,6 @@
     "dockerhub_username": "",
     "dockerhub_token": "",
     "ghcr_username": "",
-    "ghcr_token": ""
+    "ghcr_token": "",
+    "webhook_token": ""
 }

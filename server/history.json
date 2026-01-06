@@ -1,0 +1,82 @@
+[
+  {
+    "id": "25ed41fc-791e-4139-97db-68f5f56d6204",
+    "timestamp": "2026-01-06T06:22:55.501135Z",
+    "action": "auto_scan",
+    "status": "error",
+    "message": "Failed to pull image: 404 Client Error for http+docker://localhost/v1.52/images/create?tag=latest&fromImage=lighthouse-frontend: Not Found (\"pull access denied for lighthouse-frontend, repository does not exist or may require 'docker login'\")",
+    "container": "lighthouse-frontend",
+    "trigger": "auto",
+    "details": {}
+  },
+  {
+    "id": "756cfe1c-2db1-46c4-8713-d5d77b5170be",
+    "timestamp": "2026-01-06T06:22:56.999676Z",
+    "action": "auto_scan",
+    "status": "error",
+    "message": "Failed to pull image: 404 Client Error for http+docker://localhost/v1.52/images/create?tag=latest&fromImage=lighthouse-backend: Not Found (\"pull access denied for lighthouse-backend, repository does not exist or may require 'docker login'\")",
+    "container": "lighthouse-backend",
+    "trigger": "auto",
+    "details": {}
+  },
+  {
+    "id": "c6b0311b-7786-408a-8e2e-58aca9414114",
+    "timestamp": "2026-01-06T06:22:58.450508Z",
+    "action": "auto_scan",
+    "status": "error",
+    "message": "Failed to pull image: 404 Client Error for http+docker://localhost/v1.52/images/create?tag=latest&fromImage=test-ubuntu: Not Found (\"pull access denied for test-ubuntu, repository does not exist or may require 'docker login'\")",
+    "container": "ubuntu-terminal",
+    "trigger": "auto",
+    "details": {}
+  },
+  {
+    "id": "2977125d-d637-4393-b138-a6b3a6ba9a03",
+    "timestamp": "2026-01-06T06:23:48.607363Z",
+    "action": "auto_scan",
+    "status": "error",
+    "message": "Failed to pull image: 404 Client Error for http+docker://localhost/v1.52/images/create?tag=latest&fromImage=lighthouse-frontend: Not Found (\"pull access denied for lighthouse-frontend, repository does not exist or may require 'docker login'\")",
+    "container": "lighthouse-frontend",
+    "trigger": "auto",
+    "details": {}
+  },
+  {
+    "id": "b7d76c6a-67d2-4aaf-8ad4-0c7a2b73e5e8",
+    "timestamp": "2026-01-06T06:23:50.091533Z",
+    "action": "auto_scan",
+    "status": "error",
+    "message": "Failed to pull image: 404 Client Error for http+docker://localhost/v1.52/images/create?tag=latest&fromImage=lighthouse-backend: Not Found (\"pull access denied for lighthouse-backend, repository does not exist or may require 'docker login'\")",
+    "container": "lighthouse-backend",
+    "trigger": "auto",
+    "details": {}
+  },
+  {
+    "id": "15d6d323-96c9-4fd9-9709-361310c38524",
+    "timestamp": "2026-01-06T06:24:31.331496Z",
+    "action": "auto_scan",
+    "status": "error",
+    "message": "Failed to pull image: 404 Client Error for http+docker://localhost/v1.52/images/create?tag=latest&fromImage=lighthouse-frontend: Not Found (\"pull access denied for lighthouse-frontend, repository does not exist or may require 'docker login'\")",
+    "container": "lighthouse-frontend",
+    "trigger": "auto",
+    "details": {}
+  },
+  {
+    "id": "90998e20-fd39-4107-9ebb-ddc9829144e2",
+    "timestamp": "2026-01-06T06:24:33.197446Z",
+    "action": "auto_scan",
+    "status": "error",
+    "message": "Failed to pull image: 404 Client Error for http+docker://localhost/v1.52/images/create?tag=latest&fromImage=lighthouse-backend: Not Found (\"pull access denied for lighthouse-backend, repository does not exist or may require 'docker login'\")",
+    "container": "lighthouse-backend",
+    "trigger": "auto",
+    "details": {}
+  },
+  {
+    "id": "d698bca7-c579-4386-87e5-71689a90ff8d",
+    "timestamp": "2026-01-06T06:24:34.725475Z",
+    "action": "auto_scan",
+    "status": "error",
+    "message": "Failed to pull image: 404 Client Error for http+docker://localhost/v1.52/images/create?tag=latest&fromImage=test-ubuntu: Not Found (\"pull access denied for test-ubuntu, repository does not exist or may require 'docker login'\")",
+    "container": "ubuntu-terminal",
+    "trigger": "auto",
+    "details": {}
+  }
+]

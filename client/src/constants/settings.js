@@ -15,4 +15,5 @@ export const DEFAULT_SETTINGS = {
   dockerhub_token: '',
   ghcr_username: '',
   ghcr_token: '',
+  webhook_token: '',
 };
