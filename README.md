@@ -47,22 +47,14 @@ Use `docker-compose.production.yml` to run the published images without building
 ```yaml
 services:
   lighthouse:
-    image: lahiru98s/lighthouse:latest
+    image: ghcr.io/nooblk-98/lighthouse:dev
     container_name: lighthouse
     ports:
       - "8066:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./data:/app/data
-    environment:
-      - SETTINGS_DB=/app/data/settings.db
+      - /opt/stacks/lighthouse/settings.db:/app/data/settings.db
     restart: always
-    networks:
-      - lighthouse-net
-
-networks:
-  lighthouse-net:
-    driver: bridge
 ```
 
 ## Using Pre-built Images
@@ -132,11 +124,6 @@ $env:VITE_API_PROXY_TARGET="http://your-backend:8000"
 docker-compose build
 ```
 
-### View logs
-```bash
-docker-compose logs -f backend
-docker-compose logs -f frontend
-```
 
 Contributions welcome
 
