@@ -33,7 +33,7 @@
 - Ports 8066 (frontend) and 8000 (backend) available
 
 ### Installation
-To get started with Lighthouse, run the following command:
+
 ```bash
 docker compose -f docker-compose.production.yml up -d
 ```
@@ -73,7 +73,7 @@ npm install
 npm run dev
 ```
 
-## Contributing
+
 
 We welcome contributions to Lighthouse! Please see the `DEVELOPER.md` file for more information on how to contribute.
 
