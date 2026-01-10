@@ -1,6 +1,8 @@
 import io
 import os
-from fastapi import FastAPI, HTTPException, Header
+import secrets
+from fastapi import FastAPI, HTTPException, Header, Security
+from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import docker
@@ -8,6 +10,12 @@ import smtplib
 from pydantic import BaseModel
 from typing import List, Optional
 from services.history import HistoryService
+from services.updater import UpdateService
+from services.notifications import NotificationService
+from services.cache import StatusCache
+from services.settings import SettingsManager
+from services.backup import SettingsBackup
+from services.scheduler import SchedulerService
 
 app = FastAPI(title="Light House API", description="Docker Watchtower-like Monitor")
 
@@ -25,6 +33,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# API Key Security
+API_KEY = os.environ.get("API_KEY")
+if not API_KEY:
+    print("WARNING: API_KEY environment variable not set. Generating a random key.")
+    API_KEY = secrets.token_hex(32)
+    print(f"Generated API_KEY: {API_KEY}")
+
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+async def get_api_key(api_key: str = Security(api_key_header)):
+    if api_key == API_KEY:
+        return api_key
+    else:
+        raise HTTPException(status_code=403, detail="Could not validate credentials")
+
 # Docker Client
 try:
     client = docker.from_env()
@@ -33,7 +56,10 @@ except Exception as e:
     client = None
 
 
+# Pydantic Models for API Data Structures
+
 class ContainerInfo(BaseModel):
+    """Represents information about a Docker container."""
     id: str
     short_id: str
     name: str
@@ -46,14 +72,17 @@ class ContainerInfo(BaseModel):
 
 
 class ContainerExclusion(BaseModel):
+    """Represents the exclusion status of a container."""
     excluded: bool
 
 class RegistryCredentials(BaseModel):
+    """Represents credentials for a container registry."""
     provider: str
     username: str
     token: str
 
 class SmtpCredentials(BaseModel):
+    """Represents credentials for an SMTP server."""
     host: str
     port: int
     username: Optional[str] = None
@@ -61,17 +90,21 @@ class SmtpCredentials(BaseModel):
     use_tls: bool = True
 
 class SettingsExport(BaseModel):
+    """Represents the payload for exporting settings."""
     password: str
     format: Optional[str] = "json"
 
 class SettingsImport(BaseModel):
+    """Represents the payload for importing settings."""
     password: str
     content: str
 
 class TestNotification(BaseModel):
+    """Represents the payload for sending a test notification."""
     message: str | None = None
 
 class WebhookUpdateRequest(BaseModel):
+    """Represents the payload for a webhook update request."""
     container_id: Optional[str] = None
     container_name: Optional[str] = None
     update_all: bool = False
@@ -79,10 +112,20 @@ class WebhookUpdateRequest(BaseModel):
 
 @app.get("/")
 def read_root():
+    """Returns the status of the backend."""
     return {"status": "ok", "message": "Light House Backend Running"}
 
 
 def get_container_or_404(container_id: str):
+    """
+    Retrieves a Docker container by its ID or raises a 404 exception if not found.
+
+    Args:
+        container_id: The ID of the container to retrieve.
+
+    Returns:
+        The Docker container object.
+    """
     if not client:
         raise HTTPException(status_code=500, detail="Docker client not connected")
     try:
@@ -94,6 +137,12 @@ def get_container_or_404(container_id: str):
 
 
 def get_webhook_token() -> str:
+    """
+    Retrieves the webhook token from environment variables or settings.
+
+    Returns:
+        The webhook token.
+    """
     token = os.environ.get("WEBHOOK_TOKEN")
     if token:
         return token
@@ -101,6 +150,16 @@ def get_webhook_token() -> str:
 
 
 def extract_webhook_token(x_webhook_token: Optional[str], authorization: Optional[str]) -> str:
+    """
+    Extracts the webhook token from the request headers.
+
+    Args:
+        x_webhook_token: The value of the X-Webhook-Token header.
+        authorization: The value of the Authorization header.
+
+    Returns:
+        The extracted webhook token.
+    """
     if x_webhook_token:
         return x_webhook_token.strip()
     if authorization and authorization.lower().startswith("bearer "):
@@ -109,7 +168,13 @@ def extract_webhook_token(x_webhook_token: Optional[str], authorization: Optiona
 
 
 @app.get("/api/containers", response_model=List[ContainerInfo])
-def list_containers():
+def list_containers(api_key: str = Security(get_api_key)):
+    """
+    Lists all Docker containers.
+
+    Returns:
+        A list of ContainerInfo objects.
+    """
     if not client:
         raise HTTPException(status_code=500, detail="Docker client not connected")
 
@@ -134,24 +199,25 @@ def list_containers():
     return containers
 
 
-from services.updater import UpdateService
-from services.notifications import NotificationService
-
-from services.cache import StatusCache
 status_cache = StatusCache()
-
-from services.settings import SettingsManager
 settings_manager = SettingsManager()
 history_service = HistoryService()
-
 notifier = NotificationService(settings_manager)
 updater = UpdateService(settings_manager)
-from services.backup import SettingsBackup
 backup_service = SettingsBackup(settings_manager)
 
 
 @app.post("/api/containers/{container_id}/check-update")
-def check_update(container_id: str):
+def check_update(container_id: str, api_key: str = Security(get_api_key)):
+    """
+    Checks for updates for a specific container.
+
+    Args:
+        container_id: The ID of the container to check.
+
+    Returns:
+        A dictionary with the update status.
+    """
     container = get_container_or_404(container_id)
     if settings_manager.is_excluded(container.name):
         skipped = {"update_available": False, "skipped": True, "reason": "Container excluded from updates"}
@@ -191,47 +257,93 @@ def check_update(container_id: str):
     return result
 
 
-from services.scheduler import SchedulerService
-
 # Pass updater to scheduler
 scheduler = SchedulerService(settings_manager, updater, status_cache, notifier, history_service)
 
 
 @app.on_event("startup")
 def start_scheduler():
+    """Starts the scheduler service on application startup."""
     scheduler.start()
 
 
 @app.get("/api/settings")
-def get_settings():
+def get_settings(api_key: str = Security(get_api_key)):
+    """
+    Retrieves the application settings.
+
+    Returns:
+        A dictionary with the application settings.
+    """
     return settings_manager.get_all()
 
 
 @app.get("/api/schedule")
-def get_schedule():
+def get_schedule(api_key: str = Security(get_api_key)):
+    """
+    Retrieves the schedule information.
+
+    Returns:
+        A dictionary with the schedule information.
+    """
     return scheduler.get_schedule_info()
 
 
 @app.get("/api/history")
-def get_history(action: str = None, status: str = None, limit: int = 100):
+def get_history(action: str = None, status: str = None, limit: int = 100, api_key: str = Security(get_api_key)):
+    """
+    Retrieves the history of actions.
+
+    Args:
+        action: The action to filter by.
+        status: The status to filter by.
+        limit: The maximum number of history entries to return.
+
+    Returns:
+        A list of history entries.
+    """
     return history_service.get_history(action=action, status=status, limit=limit)
 
 
 @app.delete("/api/history")
-def clear_history():
+def clear_history(api_key: str = Security(get_api_key)):
+    """
+    Clears the history of actions.
+
+    Returns:
+        A dictionary indicating that the history was cleared.
+    """
     history_service.clear()
     return {"cleared": True}
 
 
 @app.post("/api/settings")
-def update_settings(new_settings: dict):
+def update_settings(new_settings: dict, api_key: str = Security(get_api_key)):
+    """
+    Updates the application settings.
+
+    Args:
+        new_settings: A dictionary with the new settings.
+
+    Returns:
+        A dictionary with the updated settings.
+    """
     updated = settings_manager.update(new_settings)
     scheduler.update_settings()
     return updated
 
 
 @app.post("/api/registries/validate")
-def validate_registry(creds: RegistryCredentials):
+def validate_registry(creds: RegistryCredentials, api_key: str = Security(get_api_key)):
+    """
+    Validates the credentials for a container registry.
+
+    Args:
+        creds: A RegistryCredentials object with the registry credentials.
+
+    Returns:
+        A dictionary indicating that the credentials are valid.
+    """
     if not client:
         raise HTTPException(status_code=500, detail="Docker client not connected")
 
@@ -250,7 +362,16 @@ def validate_registry(creds: RegistryCredentials):
 
 
 @app.post("/api/notifications/validate")
-def validate_smtp(creds: SmtpCredentials):
+def validate_smtp(creds: SmtpCredentials, api_key: str = Security(get_api_key)):
+    """
+    Validates the credentials for an SMTP server.
+
+    Args:
+        creds: An SmtpCredentials object with the SMTP credentials.
+
+    Returns:
+        A dictionary indicating that the SMTP connection was successful.
+    """
     if not creds.host or not creds.port:
         raise HTTPException(status_code=400, detail="SMTP host and port are required")
 
@@ -269,7 +390,16 @@ def validate_smtp(creds: SmtpCredentials):
         raise HTTPException(status_code=400, detail=f"SMTP validation failed: {str(e)}")
 
 @app.post("/api/notifications/test")
-def send_test_notification(payload: TestNotification = None):
+def send_test_notification(payload: TestNotification = None, api_key: str = Security(get_api_key)):
+    """
+    Sends a test notification.
+
+    Args:
+        payload: A TestNotification object with the message to send.
+
+    Returns:
+        A dictionary indicating that the test notification was sent successfully.
+    """
     try:
         msg = payload.message if payload else None
         return notifier.send_test_notification(msg or "Test email from Lighthouse.")
@@ -280,7 +410,16 @@ def send_test_notification(payload: TestNotification = None):
 
 
 @app.post("/api/settings/export")
-def export_settings(payload: SettingsExport):
+def export_settings(payload: SettingsExport, api_key: str = Security(get_api_key)):
+    """
+    Exports the application settings.
+
+    Args:
+        payload: A SettingsExport object with the password and format.
+
+    Returns:
+        A StreamingResponse with the encrypted settings file.
+    """
     try:
         content, media_type, filename = backup_service.export_encrypted(payload.password, payload.format)
     except ValueError as e:
@@ -291,7 +430,16 @@ def export_settings(payload: SettingsExport):
 
 
 @app.post("/api/settings/import")
-def import_settings(payload: SettingsImport):
+def import_settings(payload: SettingsImport, api_key: str = Security(get_api_key)):
+    """
+    Imports the application settings.
+
+    Args:
+        payload: A SettingsImport object with the encrypted settings content and password.
+
+    Returns:
+        A dictionary indicating that the settings were restored.
+    """
     try:
         restored = backup_service.import_encrypted(payload.content, payload.password)
         scheduler.update_settings()
@@ -303,7 +451,16 @@ def import_settings(payload: SettingsImport):
 
 
 @app.post("/api/containers/{container_id}/update")
-def perform_update(container_id: str):
+def perform_update(container_id: str, api_key: str = Security(get_api_key)):
+    """
+    Updates a specific container.
+
+    Args:
+        container_id: The ID of the container to update.
+
+    Returns:
+        A dictionary with the update result.
+    """
     container = get_container_or_404(container_id)
     if settings_manager.is_excluded(container.name):
         raise HTTPException(status_code=400, detail="Updates are disabled for this container")
@@ -342,7 +499,17 @@ def perform_update(container_id: str):
 
 
 @app.post("/api/containers/{container_id}/exclusion")
-def set_container_exclusion(container_id: str, payload: ContainerExclusion):
+def set_container_exclusion(container_id: str, payload: ContainerExclusion, api_key: str = Security(get_api_key)):
+    """
+    Sets the exclusion status for a specific container.
+
+    Args:
+        container_id: The ID of the container to set the exclusion status for.
+        payload: A ContainerExclusion object with the exclusion status.
+
+    Returns:
+        A dictionary with the updated exclusion status.
+    """
     container = get_container_or_404(container_id)
     settings_manager.set_excluded(container.name, payload.excluded)
     return {
@@ -353,131 +520,63 @@ def set_container_exclusion(container_id: str, payload: ContainerExclusion):
     }
 
 
+def _process_container_update(c):
+    name = c.name
+    if settings_manager.is_excluded(name):
+        reason = "Container excluded from updates"
+        status_cache.update(name, {"update_available": False, "skipped": True, "reason": reason})
+        history_service.log_event("bulk_update", "skipped", reason, name, "manual")
+        return {"id": c.id, "name": name, "status": "skipped", "reason": reason}
+
+    try:
+        check_result = updater.check_for_update(c.id)
+        if error := check_result.get("error"):
+            try:
+                notifier.send_update_notification(name, {**check_result, "success": False, "message": error})
+            except Exception:
+                pass
+            status_cache.update(name, check_result)
+            history_service.log_event("bulk_update", "error", error, name, "manual")
+            return {"id": c.id, "name": name, "status": "error", "message": error}
+
+        status_cache.update(name, check_result)
+
+        if not check_result.get("update_available"):
+            history_service.log_event("bulk_update", "up_to_date", "No updates found", name, "manual", details={"image": check_result.get("image")})
+            return {"id": c.id, "name": name, "status": "up_to_date", "message": "No updates found"}
+
+        update_result = updater.update_container(c.id)
+        if update_result.get("success"):
+            notifier.send_update_notification(name, update_result)
+            status_cache.update(name, {"update_available": False, "current_id": check_result.get("latest_id"), "latest_id": check_result.get("latest_id")})
+            history_service.log_event("bulk_update", "updated", update_result.get("message", "Updated successfully"), name, "manual", details={"image": check_result.get("image"), "new_id": update_result.get("new_id")})
+            return {"id": c.id, "name": name, "status": "updated", "message": update_result.get("message", "Updated successfully")}
+        else:
+            error = update_result.get("error", "Update failed")
+            try:
+                notifier.send_update_notification(name, {**update_result, "success": False, "message": error})
+            except Exception:
+                pass
+            history_service.log_event("bulk_update", "error", error, name, "manual", details={"image": check_result.get("image")})
+            return {"id": c.id, "name": name, "status": "error", "message": error}
+
+    except Exception as e:
+        history_service.log_event("bulk_update", "error", str(e), name, "manual")
+        return {"id": c.id, "name": name, "status": "error", "message": str(e)}
+
+
 @app.post("/api/containers/update-all")
-def update_all_containers():
+def update_all_containers(api_key: str = Security(get_api_key)):
+    """
+    Updates all containers.
+
+    Returns:
+        A dictionary with the results of the update.
+    """
     if not client:
         raise HTTPException(status_code=500, detail="Docker client not connected")
 
-    results = []
-    for c in client.containers.list(all=True):
-        name = c.name
-        if settings_manager.is_excluded(name):
-            reason = "Container excluded from updates"
-            results.append({
-                "id": c.id,
-                "name": name,
-                "status": "skipped",
-                "reason": reason,
-            })
-            status_cache.update(name, {"update_available": False, "skipped": True, "reason": reason})
-            history_service.log_event(
-                action="bulk_update",
-                status="skipped",
-                message=reason,
-                container=name,
-                trigger="manual",
-            )
-            continue
-
-        try:
-            check_result = updater.check_for_update(c.id)
-            if check_result.get("error"):
-                results.append({
-                    "id": c.id,
-                    "name": name,
-                    "status": "error",
-                    "message": check_result.get("error"),
-                })
-                try:
-                    notifier.send_update_notification(name, {**check_result, "success": False, "message": check_result.get("error")})
-                except Exception:
-                    pass
-                status_cache.update(name, check_result)
-                history_service.log_event(
-                    action="bulk_update",
-                    status="error",
-                    message=check_result.get("error"),
-                    container=name,
-                    trigger="manual",
-                )
-                continue
-
-            status_cache.update(name, check_result)
-
-            if not check_result.get("update_available"):
-                results.append({
-                    "id": c.id,
-                    "name": name,
-                    "status": "up_to_date",
-                    "message": "No updates found",
-                })
-                status_cache.update(name, check_result)
-                history_service.log_event(
-                    action="bulk_update",
-                    status="up_to_date",
-                    message="No updates found",
-                    container=name,
-                    trigger="manual",
-                    details={"image": check_result.get("image")},
-                )
-                continue
-
-            update_result = updater.update_container(c.id)
-            if update_result.get("success"):
-                results.append({
-                    "id": c.id,
-                    "name": name,
-                    "status": "updated",
-                    "message": update_result.get("message", "Updated successfully"),
-                })
-                notifier.send_update_notification(name, update_result)
-                status_cache.update(name, {
-                    "update_available": False,
-                    "current_id": check_result.get("latest_id"),
-                    "latest_id": check_result.get("latest_id"),
-                })
-                history_service.log_event(
-                    action="bulk_update",
-                    status="updated",
-                    message=update_result.get("message", "Updated successfully"),
-                    container=name,
-                    trigger="manual",
-                    details={"image": check_result.get("image"), "new_id": update_result.get("new_id")},
-                )
-            else:
-                try:
-                    notifier.send_update_notification(name, {**update_result, "success": False, "message": update_result.get("error", "Update failed")})
-                except Exception:
-                    pass
-                results.append({
-                    "id": c.id,
-                    "name": name,
-                    "status": "error",
-                    "message": update_result.get("error", "Update failed"),
-                })
-                history_service.log_event(
-                    action="bulk_update",
-                    status="error",
-                    message=update_result.get("error", "Update failed"),
-                    container=name,
-                    trigger="manual",
-                    details={"image": check_result.get("image")},
-                )
-        except Exception as e:
-            results.append({
-                "id": c.id,
-                "name": name,
-                "status": "error",
-                "message": str(e),
-            })
-            history_service.log_event(
-                action="bulk_update",
-                status="error",
-                message=str(e),
-                container=name,
-                trigger="manual",
-            )
-
+    results = [_process_container_update(c) for c in client.containers.list(all=True)]
     summary = {
         "updated": len([r for r in results if r["status"] == "updated"]),
         "up_to_date": len([r for r in results if r["status"] == "up_to_date"]),
@@ -485,7 +584,6 @@ def update_all_containers():
         "errors": len([r for r in results if r["status"] == "error"]),
         "total": len(results),
     }
-
     return {"results": results, "summary": summary}
 
 
@@ -495,6 +593,17 @@ def webhook_update(
     x_webhook_token: Optional[str] = Header(default=None, alias="X-Webhook-Token"),
     authorization: Optional[str] = Header(default=None),
 ):
+    """
+    Updates containers via a webhook.
+
+    Args:
+        payload: A WebhookUpdateRequest object with the container to update.
+        x_webhook_token: The webhook token from the X-Webhook-Token header.
+        authorization: The webhook token from the Authorization header.
+
+    Returns:
+        A dictionary with the results of the update.
+    """
     configured_token = get_webhook_token()
     if not configured_token:
         raise HTTPException(status_code=400, detail="Webhook token not configured")
