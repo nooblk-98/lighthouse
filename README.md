@@ -29,76 +29,35 @@
 ## Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose (v3.8+)
-- Port 8066 (frontend) and 8000 (backend) available
+- Docker & Docker Compose
+- Ports 8066 (frontend) and 8000 (backend) available
 
 ### Installation
 
-Run using pre-built images
-   ```bash
-   docker-compose -f docker-compose.production.yml up -d
-   ```
-
-
-## Docker Compose (pre-built images)
-
-Use `docker-compose.production.yml` to run the published images without building:
-
-```yaml
-services:
-  lighthouse:
-    image: ghcr.io/nooblk-98/lighthouse:dev
-    container_name: lighthouse
-    ports:
-      - "8066:80"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/stacks/lighthouse/settings.db:/app/data/settings.db
-    restart: always
-```
-
-## Using Pre-built Images
-
-Instead of building locally, pull the published images:
-
 ```bash
-# Docker Hub
-docker pull lahiru98s/lighthouse:latest
-
-# GitHub Container Registry
-docker pull ghcr.io/nooblk-98/lighthouse:latest
+docker compose -f docker-compose.production.yml up -d
 ```
 
-Run with compose:
-```bash
-docker-compose -f docker-compose.production.yml up -d
-```
+This will pull the latest pre-built images from Docker Hub and start the application in detached mode. Once the containers are running, you can access the Lighthouse UI at `http://localhost:8066`.
 
-Run FrontEnd with remote Backend For developement 
-```bash
-$env:VITE_API_PROXY_TARGET="http://80.225.221.245:8000"; npm run dev
-```
-Dev with compose:
-```bash
-docker compose -f docker-compose.dev.yml up --build
-```
 
-## UI Preview
+## Security
 
-<div align="center">
-  <img src="./images/ui/ui_1.png" alt="Lighthouse UI preview 1" width="800" />
-  <br/><br/>
-  <img src="./images/ui/ui_2.png" alt="Lighthouse UI preview 2" width="800" />
-</div>
+The Lighthouse API is protected by API key authentication. To access the API, you must provide a valid API key in the `X-API-Key` header of your requests.
+
+By default, a random API key is generated when the application starts. You can set your own API key by setting the `API_KEY` environment variable in the `docker-compose.production.yml` file.
 
 ## Development
 
-### Run both services with Docker (recommended)
+To run Lighthouse in a development environment, you can use the `docker-compose.dev.yml` file. This will build the images from the local source code and start the containers with hot-reloading enabled.
+
 ```bash
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-### Run locally without Docker
+### Running Locally
+
+You can also run the frontend and backend services locally without Docker.
 
 **Backend**
 ```bash
@@ -114,18 +73,9 @@ npm install
 npm run dev
 ```
 
-For a non-local backend, set `VITE_API_PROXY_TARGET` before running Vite:
-```bash
-$env:VITE_API_PROXY_TARGET="http://your-backend:8000"
-```
-
-### Build images locally
-```bash
-docker-compose build
-```
 
 
-Contributions welcome
+We welcome contributions to Lighthouse! Please see the `DEVELOPER.md` file for more information on how to contribute.
 
 ## TODO / Ideas
 - Create login page for UI
