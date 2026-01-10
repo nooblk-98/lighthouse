@@ -1,10 +1,18 @@
+version: '3.8'
+
 services:
   lighthouse:
-    image: ghcr.io/nooblk-98/lighthouse:dev
+    image: lahiru98s/lighthouse:latest
     container_name: lighthouse
     ports:
       - "8066:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/stacks/lighthouse/settings.db:/app/data/settings.db
+      - ./settings.json:/app/settings.json
     restart: always
+    networks:
+      - lighthouse-net
+
+networks:
+  lighthouse-net:
+    driver: bridge

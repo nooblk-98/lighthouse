@@ -14,5 +14,4 @@ services:
       - .:/app
     environment:
       - PYTHONUNBUFFERED=1
-      - SETTINGS_DB=/app/data/settings.db
     restart: unless-stopped

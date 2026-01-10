@@ -14,9 +14,7 @@ services:
 		container_name: lighthouse-backend
 		volumes:
 			- /var/run/docker.sock:/var/run/docker.sock
-			- ./data:/app/data
-		environment:
-			- SETTINGS_DB=/app/data/settings.db
+			- ./settings.json:/app/settings.json
 		restart: always
 		networks:
 			- lighthouse-net
