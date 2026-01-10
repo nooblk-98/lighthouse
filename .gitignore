@@ -16,6 +16,3 @@ client/vite.config.js
 server/__pycache__/
 server/.venv
 server/*.pyc
-settings.db
-server/data/
-data/
